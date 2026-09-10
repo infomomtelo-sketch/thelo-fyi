@@ -118,7 +118,7 @@ function closeModal() {
 
 async function loadFacilities() {
   try {
-    const res = await fetch('https://thelo.fyi/api/facilities');
+    const res = await fetch('/api/facilities.json');
     const data = await res.json();
     window.facilities = data.facilities || data || [];
     console.log('loaded', window.facilities.length);

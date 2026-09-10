@@ -37,7 +37,7 @@
     <span class="mx-2">•</span><a href="/disclaimer/" class="hover:text-slate-300">Disclaimer</a>
   </footer>
 
-  <div id="facilityModal" class="fixed inset-x-0 bottom-0 z-[99999] hidden px-4 pb-4 lg:inset-0 lg:flex lg:items-center lg:justify-center" aria-hidden="true">
+  <div id="facilityModal" class="hidden fixed inset-0 z-50 px-4 pb-4 lg:inset-0 lg:flex lg:items-center lg:justify-center" aria-hidden="true">
     <div class="w-full max-w-xl rounded-t-3xl border border-white/10 bg-slate-950 p-5 shadow-2xl lg:rounded-3xl" role="dialog" aria-modal="true">
       <div class="flex items-start justify-between gap-4">
         <div>
@@ -54,15 +54,14 @@
         <p><span class="text-slate-400">Last updated:</span> <span id="modalUpdated"></span></p>
       </div>
       <div class="mt-5 flex flex-col gap-3 sm:flex-row">
-        <a id="callFacilityButton" href="#" class="inline-flex items-center justify-center rounded-full bg-emerald-400 px-4 py-3 text-sm font-bold text-slate-950">Call Facility</a>
+        <a id="callBtn" href="#" class="inline-flex items-center justify-center rounded-full bg-emerald-400 px-4 py-3 text-sm font-bold text-slate-950">Call Facility</a>
       </div>
     </div>
   </div>
 
   <script>
-    let facilitiesData = [];
+    window.facilities = [];
     const FACILITIES_API_URLS = ["https://thelo.fyi/api/facilities", "/api/facilities"];
-    const FACILITY_API_BASES = ["https://thelo.fyi/api/facility", "/api/facility"];
 
     const demoFacilities = [
       { id: 1, name: "Fresno Garden House", address: "1234 N Cedar Ave, Fresno, CA 93703", beds_available: 2, care_level: "RCFE", phone: "(559) 555-0101", last_updated: "2026-09-10T00:00:00Z", lat: 36.7378, lng: -119.7871, slug: "fresno-garden-house" },
@@ -149,43 +148,22 @@
       throw lastError;
     }
 
-    function applyFacilityToModal(facility) {
-      const phone = String(facility.phone || "").trim();
-      const dialablePhone = phone.replace(/[^\d+]/g, "");
-      document.getElementById("modalName").textContent = facility.name;
-      document.getElementById("modalAddress").textContent = facility.address;
-      document.getElementById("modalBeds").textContent = String(facility.beds_available);
-      document.getElementById("modalCare").textContent = facility.care_level;
-      document.getElementById("modalPhone").textContent = phone || "Not provided";
-      document.getElementById("modalPhone").href = dialablePhone ? `tel:${dialablePhone}` : "tel:";
-      document.getElementById("modalUpdated").textContent = formatUpdated(facility.last_updated);
-      document.getElementById("callFacilityButton").href = dialablePhone ? `tel:${dialablePhone}` : "tel:";
-    }
-
-    async function fetchFacilityDetail(id) {
-      let lastError = new Error("Facility detail unavailable");
-      for (const base of FACILITY_API_BASES) {
-        try {
-          const data = await fetchJson(`${base}?id=${encodeURIComponent(id)}`);
-          return normalizeFacility(data, 0);
-        } catch (error) {
-          lastError = error;
-        }
-      }
-
-      const fallback = facilitiesData.find((item) => String(item.id) === String(id));
-      if (fallback) return fallback;
-      throw lastError;
-    }
-
-    async function openFacility(id) {
-      const facility = await fetchFacilityDetail(id).catch(() => facilitiesData.find((item) => String(item.id) === String(id)));
-      if (!facility) return;
-      applyFacilityToModal(facility);
+    window.openFacility = function(id) {
+      console.log("open", id);
+      const f = window.facilities.find((x) => String(x.id) === String(id));
+      if (!f) return alert("facility not found " + id);
+      document.getElementById("modalName").innerText = f.name || "";
+      document.getElementById("modalAddress").innerText = f.address || "";
+      document.getElementById("modalBeds").innerText = f.beds_available ?? "";
+      document.getElementById("modalCare").innerText = f.care_level || "";
+      document.getElementById("modalPhone").innerText = f.phone || "";
+      document.getElementById("modalPhone").href = "tel:" + (f.phone || "");
+      document.getElementById("modalUpdated").innerText = f.last_updated || "";
+      document.getElementById("callBtn").href = "tel:" + (f.phone || "");
       const modal = document.getElementById("facilityModal");
       modal.classList.remove("hidden");
       modal.setAttribute("aria-hidden", "false");
-    }
+    };
 
     function closeFacility() {
       const modal = document.getElementById("facilityModal");
@@ -200,43 +178,45 @@
 
     async function fetchFacilities() {
       try {
-        return normalizeFacilities(await fetchFirst(FACILITIES_API_URLS));
+      const facilities = normalizeFacilities(await fetchFirst(FACILITIES_API_URLS));
+      window.facilities = facilities;
+      return facilities;
       } catch (_) {
-        try {
-          return normalizeFacilities(await fetchJson("/data/availability.json"));
-        } catch (_) {
-          return demoFacilities;
-        }
+      try {
+        const facilities = normalizeFacilities(await fetchJson("/data/availability.json"));
+        window.facilities = facilities;
+        return facilities;
+      } catch (_) {
+        window.facilities = demoFacilities;
+        return demoFacilities;
+      }
       }
     }
 
     function renderFacilities(facilities) {
-      facilitiesData = facilities;
+      window.facilities = facilities;
       markerLayer.clearLayers();
       const list = document.getElementById("facilityList");
       list.innerHTML = facilities.map((facility) => `
-        <article class="facility-card rounded-2xl border border-white/10 bg-slate-950/80 p-4" data-id="${escapeHtml(facility.id)}" style="cursor:pointer">
-          <div class="flex items-center justify-between gap-3">
-            <h2 class="font-semibold text-white">${escapeHtml(facility.name)}</h2>
-            <span class="rounded-full px-3 py-1 text-xs font-bold ${facility.beds_available > 0 ? "bg-emerald-400 text-slate-950" : "bg-slate-600 text-white"}">${facility.beds_available > 0 ? "Available" : "Full"}</span>
-          </div>
-          <p class="mt-2 text-sm text-slate-300">${escapeHtml(facility.address)}</p>
-          <p class="mt-1 text-sm text-slate-300">${facility.beds_available} beds open • ${escapeHtml(facility.care_level)} • ${escapeHtml(facility.phone || "Phone unavailable")}</p>
-          <p class="mt-1 text-xs text-slate-500">Updated ${escapeHtml(formatUpdated(facility.last_updated))}</p>
-        </article>
+      <div onclick="window.openFacility('${escapeHtml(facility.id)}')" class="facility-card cursor-pointer pointer-events-auto rounded-2xl border border-white/10 bg-slate-950/80 p-4">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="font-semibold text-white">${escapeHtml(facility.name)}</h2>
+          <span class="rounded-full px-3 py-1 text-xs font-bold ${facility.beds_available > 0 ? "bg-emerald-400 text-slate-950" : "bg-slate-600 text-white"}">${facility.beds_available > 0 ? "Available" : "Full"}</span>
+        </div>
+        <p class="mt-2 text-sm text-slate-300">${escapeHtml(facility.address)}</p>
+        <p class="mt-1 text-sm text-slate-300">${facility.beds_available} beds open • ${escapeHtml(facility.care_level)} • ${escapeHtml(facility.phone || "Phone unavailable")}</p>
+        <p class="mt-1 text-xs text-slate-500">Updated ${escapeHtml(formatUpdated(facility.last_updated))}</p>
+      </div>
       `).join("");
-      list.querySelectorAll("[data-id]").forEach((card) => {
-        card.addEventListener("click", () => openFacility(card.dataset.id));
-      });
 
       facilities.forEach((facility) => {
-        const marker = L.marker([facility.lat, facility.lng], {
-          icon: facility.beds_available > 0 ? greenIcon : grayIcon
-        }).addTo(markerLayer);
-        marker.on("click", () => openFacility(facility.id));
-        marker.bindPopup(`
-          <div class="space-y-2">
-            <strong>${escapeHtml(facility.name)}</strong>
+      const marker = L.marker([facility.lat, facility.lng], {
+        icon: facility.beds_available > 0 ? greenIcon : grayIcon
+      }).addTo(markerLayer);
+      marker.on("click", () => window.openFacility(facility.id));
+      marker.bindPopup(`
+        <div class="space-y-2">
+          <strong>${escapeHtml(facility.name)}</strong>
             <div>${escapeHtml(facility.address)}</div>
             <div>${facility.beds_available} beds open • ${escapeHtml(facility.care_level)}</div>
             <div>${escapeHtml(facility.phone || "Phone unavailable")}</div>
@@ -244,9 +224,7 @@
         `);
       });
     }
-
     fetchFacilities().then(renderFacilities);
-    window.openFacility = openFacility;
   </script>
 </body>
 </html>

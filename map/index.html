@@ -9,8 +9,8 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100">
-  <a href="/" style="position:fixed;top:16px;left:16px;z-index:9999;background:#2563eb;color:white;padding:8px 16px;border-radius:999px;text-decoration:none;font-family:system-ui;font-weight:600;box-shadow:0 8px 24px rgba(37,99,235,0.35)">← Home</a>
-<div style="height:56px"></div>
+  <a href="/" style="position:fixed;top:16px;left:16px;z-index:99999;background:#2563eb;color:white;padding:8px 16px;border-radius:999px;text-decoration:none;font-family:system-ui;font-weight:600;box-shadow:0 8px 24px rgba(37,99,235,0.35)">← Home</a>
+  <div style="height:56px"></div>
   <div class="bg-amber-300 px-6 py-3 text-center text-sm font-black text-slate-950">For Agents $99/mo</div>
   <main class="mx-auto max-w-7xl px-6 py-8">
     <div class="mb-6 flex items-center justify-between gap-4">
@@ -25,12 +25,36 @@
         <div id="facilityList" class="space-y-4"></div>
       </aside>
       <section class="overflow-hidden rounded-3xl border border-white/10">
-        <div id="map" class="h-[70vh] w-full"></div>
+        <div id="map" class="h-[70vh] w-full" style="pointer-events:auto"></div>
       </section>
     </div>
   </main>
 
+  <div id="facilityModal" class="fixed inset-x-0 bottom-0 z-[99999] hidden px-4 pb-4 lg:inset-0 lg:flex lg:items-center lg:justify-center" aria-hidden="true">
+    <div class="w-full max-w-xl rounded-t-3xl border border-white/10 bg-slate-950 p-5 shadow-2xl lg:rounded-3xl" role="dialog" aria-modal="true">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Facility details</p>
+          <h2 id="modalName" class="mt-1 text-2xl font-black text-white"></h2>
+        </div>
+        <button id="closeFacilityModal" type="button" class="rounded-full border border-white/10 px-3 py-2 text-sm font-semibold text-slate-200">Close</button>
+      </div>
+      <div class="mt-4 space-y-3 text-sm text-slate-200">
+        <p><span class="text-slate-400">Address:</span> <span id="modalAddress"></span></p>
+        <p><span class="text-slate-400">Beds available:</span> <span id="modalBeds"></span></p>
+        <p><span class="text-slate-400">Care level:</span> <span id="modalCare"></span></p>
+        <p><span class="text-slate-400">Phone:</span> <a id="modalPhone" class="text-sky-300 underline" href="#"></a></p>
+        <p><span class="text-slate-400">Last updated:</span> <span id="modalUpdated"></span></p>
+      </div>
+      <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+        <a id="callFacilityButton" href="#" class="inline-flex items-center justify-center rounded-full bg-emerald-400 px-4 py-3 text-sm font-bold text-slate-950">Call Facility</a>
+      </div>
+    </div>
+  </div>
+
   <script>
+    let facilitiesData = [];
+
     const demoFacilities = [
       { id: 1, name: "Fresno Garden House", address: "1234 N Cedar Ave, Fresno, CA 93703", beds_available: 2, care_level: "RCFE", phone: "(559) 555-0101", last_updated: "2026-09-10T00:00:00Z", lat: 36.7378, lng: -119.7871 },
       { id: 2, name: "Fig Garden Care", address: "4567 W Shaw Ave, Fresno, CA 93711", beds_available: 0, care_level: "RCFE", phone: "(559) 555-0102", last_updated: "2026-09-10T00:00:00Z", lat: 36.8082, lng: -119.8318 },
@@ -45,6 +69,7 @@
 
     const markerClass = `
       <style>
+        .facility-card { pointer-events: auto; cursor: pointer; }
         .thelo-pin {
           width: 18px;
           height: 18px;
@@ -69,6 +94,33 @@
       }));
     }
 
+    function openFacility(id) {
+      const facility = facilitiesData.find((item) => String(item.id) === String(id));
+      if (!facility) return;
+      document.getElementById("modalName").textContent = facility.name;
+      document.getElementById("modalAddress").textContent = facility.address;
+      document.getElementById("modalBeds").textContent = facility.beds_available;
+      document.getElementById("modalCare").textContent = facility.care_level;
+      document.getElementById("modalPhone").textContent = facility.phone;
+      document.getElementById("modalPhone").href = `tel:${String(facility.phone).replace(/[^\d+]/g, "")}`;
+      document.getElementById("modalUpdated").textContent = facility.last_updated;
+      document.getElementById("callFacilityButton").href = `tel:${String(facility.phone).replace(/[^\d+]/g, "")}`;
+      const modal = document.getElementById("facilityModal");
+      modal.classList.remove("hidden");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeFacility() {
+      const modal = document.getElementById("facilityModal");
+      modal.classList.add("hidden");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    document.getElementById("closeFacilityModal").addEventListener("click", closeFacility);
+    document.getElementById("facilityModal").addEventListener("click", (event) => {
+      if (event.target.id === "facilityModal") closeFacility();
+    });
+
     async function fetchFacilities() {
       try {
         const response = await fetch("/data/availability.json");
@@ -81,9 +133,10 @@
     }
 
     function renderFacilities(facilities) {
+      facilitiesData = facilities;
       const list = document.getElementById("facilityList");
       list.innerHTML = facilities.map((facility) => `
-        <article class="rounded-2xl border border-white/10 bg-slate-950/80 p-4">
+        <article class="facility-card rounded-2xl border border-white/10 bg-slate-950/80 p-4" data-id="${facility.id}" onclick="openFacility(${facility.id})" style="cursor:pointer">
           <div class="flex items-center justify-between gap-3">
             <h2 class="font-semibold text-white">${facility.name}</h2>
             <span class="rounded-full px-3 py-1 text-xs font-bold ${facility.beds_available > 0 ? "bg-emerald-400 text-slate-950" : "bg-slate-600 text-white"}">${facility.beds_available > 0 ? "Available" : "Full"}</span>
@@ -98,6 +151,7 @@
         const marker = L.marker([facility.lat, facility.lng], {
           icon: facility.beds_available > 0 ? greenIcon : grayIcon
         }).addTo(map);
+        marker.on('click', () => openFacility(facility.id));
         marker.bindPopup(`
           <div class="space-y-2">
             <strong>${facility.name}</strong>
@@ -110,6 +164,7 @@
     }
 
     fetchFacilities().then(renderFacilities);
+    window.openFacility = openFacility;
   </script>
 </body>
 </html>

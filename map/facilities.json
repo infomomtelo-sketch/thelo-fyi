@@ -1,0 +1,28 @@
+{
+  "facilities": [
+    {
+      "id": "1",
+      "slug": "fresno-assisted-living",
+      "name": "Fresno Assisted Living",
+      "address": "123 N Fresno St, Fresno, CA",
+      "lat": 36.7378,
+      "lng": -119.7871,
+      "beds_available": 3,
+      "care_level": "Assisted Living",
+      "phone": "5595550100",
+      "last_updated": "2026-05-10"
+    },
+    {
+      "id": "2",
+      "slug": "clovis-care",
+      "name": "Clovis Care Center",
+      "address": "456 Clovis Ave, Clovis, CA",
+      "lat": 36.8252,
+      "lng": -119.7029,
+      "beds_available": 1,
+      "care_level": "Memory Care",
+      "phone": "5595550200",
+      "last_updated": "2026-05-10"
+    }
+  ]
+}

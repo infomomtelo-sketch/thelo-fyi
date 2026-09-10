@@ -19,7 +19,7 @@ function openFacility(id){
 }
 
 async function loadFacilities(){
- const urls=['../facilities.json','/facilities.json','./facilities.json'];
+ const urls=['./facilities.json','../facilities.json','/facilities.json'];
  for(const url of urls){
   try{
    const res=await fetch(url,{cache:'no-store'});

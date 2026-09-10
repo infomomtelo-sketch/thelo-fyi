@@ -1,56 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Lo - Facility Map</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>#map{height:100vh}#facilityList{max-height:100vh;overflow-y:auto}</style>
-</head>
-<body class="bg-gray-900 text-white flex">
-<div class="w-full md:w-96 p-4 bg-gray-900 z-10 flex flex-col">
-<h1 class="font-bold text-xl mb-4">Fresno Care Facilities</h1>
-<div id="facilityList" class="flex-1">Loading...</div>
-</div>
-<div id="map" class="flex-1"></div>
-<div id="facilityModal" class="hidden fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4">
-<div class="bg-gray-800 rounded-2xl p-6 w-full max-w-md border border-gray-700">
-<div class="flex justify-between"><h2 id="modalName" class="font-bold">FACILITY DETAILS</h2><button onclick="closeModal()" class="text-gray-400">Close</button></div>
-<div class="mt-4 text-sm text-gray-300 space-y-2">
-<div>Address: <span id="modalAddress" class="text-white"></span></div>
-<div>Beds: <span id="modalBeds" class="text-white font-bold"></span></div>
-<div>Care: <span id="modalCare"></span></div>
-<div>Phone: <span id="modalPhone"></span></div>
-<div class="text-xs text-gray-500">Updated: <span id="modalUpdated"></span></div>
-</div>
-<a id="callBtn" href="#" class="mt-6 inline-block bg-green-500 text-white px-6 py-2 rounded-full font-bold">Call Facility</a>
-</div>
-</div>
 <script>
-window.facilities = [];
-let map, markers=[];
-function initMap(){map=L.map('map').setView([36.7378,-119.7871],11);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);}
-function renderMarkers(list){markers.forEach(m=>map.removeLayer(m));markers=[];list.forEach(f=>{if(!f.lat||!f.lng)return;const m=L.marker([f.lat,f.lng]).addTo(map);m.on('click',()=>window.openFacility(f.id));markers.push(m);});}
-function renderCards(list){const el=document.getElementById('facilityList');if(!list.length){el.innerHTML='<div class="text-gray-400">No facilities</div>';return;}el.innerHTML=list.map(f=>`<div onclick="window.openFacility('${f.id}')" class="cursor-pointer p-4 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 mb-3"><div class="font-bold">${f.name}</div><div class="text-xs text-gray-400">${f.address||''}</div><div class="mt-2"><span class="px-2 py-1 rounded-full ${f.beds_available>0?'bg-green-500':'bg-gray-600'} text-white text-xs">${f.beds_available>0?f.beds_available+' Beds':'Full'}</span></div></div>`).join('');}
-window.openFacility=function(id){const f=window.facilities.find(x=>String(x.id)===String(id));if(!f)return;document.getElementById('modalName').innerText=f.name;document.getElementById('modalAddress').innerText=f.address||'';document.getElementById('modalBeds').innerText=f.beds_available??'0';document.getElementById('modalCare').innerText=f.care_level||'';document.getElementById('modalPhone').innerText=f.phone||'No phone listed';document.getElementById('modalUpdated').innerText=f.last_updated||'';const b=document.getElementById('callBtn');if(f.phone&&f.phone.trim()){b.href='tel:'+f.phone;b.classList.remove('opacity-50','pointer-events-none');b.innerText='Call Facility';}else{b.href='javascript:void(0)';b.classList.add('opacity-50','pointer-events-none');b.innerText='No phone listed';}document.getElementById('facilityModal').classList.remove('hidden');}
-function closeModal(){document.getElementById('facilityModal').classList.add('hidden');}
+let facilities = [];
+const FALLBACK = [
+  {id:"1",name:"Fresno Assisted Living",address:"123 N Fresno St, Fresno, CA",lat:36.7378,lng:-119.7871,beds_available:3,care_level:"Assisted Living",phone:"5595550100",last_updated:"2026-05-10"}
+];
 
-const FALLBACK = [{"id":"1","name":"Fresno Assisted Living","address":"123 N Fresno St, Fresno, CA","lat":36.7378,"lng":-119.7871,"beds_available":3,"care_level":"Assisted Living","phone":"5595550100","last_updated":"2026-05-10"},{"id":"2","name":"Clovis Care Center","address":"456 Clovis Ave, Clovis, CA","lat":36.8252,"lng":-119.7029,"beds_available":1,"care_level":"Memory Care","phone":"5595550200","last_updated":"2026-05-10"}];
+function openFacility(id){
+ const f = facilities.find(x=>String(x.id)===String(id));
+ if(!f){console.error('not found',id);return;}
+ document.getElementById('modalName').textContent=f.name||'';
+ document.getElementById('modalAddress').textContent=f.address||'';
+ document.getElementById('modalBeds').textContent=f.beds_available??'';
+ document.getElementById('modalCare').textContent=f.care_level||f.care_type||'';
+ document.getElementById('modalPhone').textContent=f.phone||'No phone listed';
+ document.getElementById('modalUpdated').textContent=f.last_updated||f.updated_at||'';
+ document.getElementById('callBtn').href=f.phone?`tel:${f.phone}`:'#';
+ document.getElementById('facilityModal').classList.remove('hidden');
+ window.facilities=facilities;
+}
 
 async function loadFacilities(){
- try{
-  let data=null;
-  try{const r=await fetch('./facilities.json');if(r.ok){const t=await r.text();if(!t.trim().startsWith('<')) data=JSON.parse(t);}}catch(e){}
-  if(!data){try{const r2=await fetch('/map/facilities.json');if(r2.ok){const t=await r2.text();if(!t.trim().startsWith('<')) data=JSON.parse(t);}}catch(e){}}
-  window.facilities = data?.facilities || data || FALLBACK;
-  console.log('loaded',window.facilities.length);
-  renderCards(window.facilities); renderMarkers(window.facilities);
- }catch(e){window.facilities=FALLBACK;renderCards(FALLBACK);renderMarkers(FALLBACK);}
+ const urls=['../facilities.json','/facilities.json','./facilities.json'];
+ for(const url of urls){
+  try{
+   const res=await fetch(url,{cache:'no-store'});
+   const text=await res.text();
+   console.log(url, res.status, text.slice(0,80));
+   if(!res.ok) continue;
+   if(text.trim().startsWith('<')) continue;
+   const data=JSON.parse(text);
+   facilities=data.facilities||data;
+   renderCards(facilities); renderMarkers(facilities);
+   return;
+  }catch(e){console.warn('fail',url,e)}
+ }
+ console.log('using FALLBACK');
+ facilities=FALLBACK;
+ renderCards(facilities); renderMarkers(facilities);
 }
-initMap();loadFacilities();
-document.getElementById('facilityModal').addEventListener('click',(e)=>{if(e.target.id==='facilityModal')closeModal();});
 </script>
-</body>
-</html>

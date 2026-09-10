@@ -13,7 +13,7 @@
         <p class="text-sm uppercase tracking-[0.2em] text-slate-400">Thelo Engine</p>
         <h1 class="mt-2 text-3xl font-black">Facility floor plan + Title 22 check</h1>
       </div>
-      <a href="/" class="rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-slate-200">Back Home</a>
+      <a href="/" data-back-nav class="rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-slate-200" aria-label="Go back to previous page or home">← Back</a>
     </div>
 
     <div class="grid gap-8 lg:grid-cols-[1.4fr,0.8fr]">
@@ -98,6 +98,7 @@
     </div>
   </main>
 
+  <script src="/back-nav.js"></script>
   <script>
     const API_BASES = ["/api", "https://api.thelo.fyi/api"];
     const STORAGE_KEY = "theloFacilityDraft";

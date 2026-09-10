@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thelo Agent Access</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100">
+  <main class="mx-auto flex min-h-screen max-w-4xl items-center px-6 py-12">
+    <section class="grid w-full gap-8 rounded-[2rem] border border-white/10 bg-white/5 p-8 lg:grid-cols-[1fr,0.9fr]">
+      <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-amber-300">Agent access</p>
+        <h1 class="mt-3 text-4xl font-black text-white">$99/mo live referral map</h1>
+        <p class="mt-6 text-lg leading-8 text-slate-300">Get verified Fresno inventory, live bed availability, and direct referral links built for placement agents.</p>
+        <ul class="mt-8 space-y-3 text-sm text-slate-300">
+          <li>• Live map of open and full facilities</li>
+          <li>• Verified PASS floor-plan compliance status</li>
+          <li>• Referral pages ready to share with families</li>
+        </ul>
+      </div>
+      <form id="agentForm" class="rounded-3xl border border-white/10 bg-slate-950/80 p-6">
+        <label class="block">
+          <span class="mb-2 block text-sm font-medium text-slate-200">Email</span>
+          <input id="email" type="email" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white" placeholder="agent@example.com">
+        </label>
+        <button type="submit" class="mt-6 w-full rounded-full bg-amber-300 px-6 py-4 text-sm font-bold text-slate-950">Request Agent Access</button>
+        <p id="agentStatus" class="mt-4 text-sm text-slate-300"></p>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    document.getElementById("agentForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      localStorage.setItem("theloAgentLead", email);
+      document.getElementById("agentStatus").textContent = "Saved locally. We will contact you about $99/mo access.";
+      event.target.reset();
+    });
+  </script>
+</body>
+</html>

@@ -1,43 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>thelo.fyi - Use Thelo AI for your Facility</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>thelo.fyi | Thelo AI for Facilities</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-white text-gray-900">
-<header class="border-b p-4 flex justify-between items-center">
-<div class="font-bold text-xl">thelo.fyi</div>
-<nav class="space-x-4 text-sm"><a href="/map">Map</a> <a href="/app/">App</a> <a href="/create">Create</a> <a href="/agent">Agents</a></nav>
-</header>
+<body class="min-h-screen bg-slate-950 text-slate-100">
+  <header class="border-b border-white/10 bg-slate-950/90">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <a href="/" class="text-lg font-semibold tracking-tight">thelo.fyi</a>
+      <nav class="flex gap-4 text-sm text-slate-300">
+        <a href="/create" class="hover:text-white">Create</a>
+        <a href="/map" class="hover:text-white">Map</a>
+        <a href="/app/" class="hover:text-white">Floor Plan</a>
+        <a href="/agent/" class="hover:text-white">Agent Access</a>
+      </nav>
+    </div>
+  </header>
 
-<section class="text-center py-20 px-6 bg-gradient-to-b from-blue-50 to-white">
-<h1 class="text-5xl font-black mb-4">Use Thelo AI for your Facility</h1>
-<p class="text-xl text-gray-600 mb-2">Thelo will create your referral page, find clients, and keep you Title 22 compliant.</p>
-<div class="text-xs text-gray-500 mb-8">Powered by Claude Sonnet 4 • Cloudflare Workers • Title 22 §87307</div>
-<div class="space-x-3">
-<a href="/create" class="bg-black text-white px-8 py-3 rounded-full font-bold">🔗 Create Referral Page Free</a>
-<a href="/map" class="border px-8 py-3 rounded-full font-bold">🗺️ View Live Map Fresno</a>
-</div>
-<a href="/app/" class="mt-4 inline-block text-sm underline">📸 Check Floor Plan Free</a>
-</section>
+  <main>
+    <section class="border-b border-white/10 bg-gradient-to-b from-sky-500/20 via-slate-950 to-slate-950">
+      <div class="mx-auto max-w-6xl px-6 py-20 text-center">
+        <div class="mb-6 flex flex-wrap justify-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200">
+          <span class="rounded-full border border-white/15 bg-white/5 px-4 py-2">Claude Sonnet 4</span>
+          <span class="rounded-full border border-white/15 bg-white/5 px-4 py-2">Cloudflare Workers</span>
+          <span class="rounded-full border border-white/15 bg-white/5 px-4 py-2">Title 22</span>
+        </div>
+        <h1 class="mx-auto max-w-4xl text-4xl font-black tracking-tight text-white md:text-6xl">Use Thelo AI for your Facility</h1>
+        <p class="mx-auto mt-6 max-w-3xl text-lg text-slate-300 md:text-xl">Thelo will create your referral page, find clients, keep you Title 22 compliant.</p>
+        <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <a href="/create" class="w-full rounded-full bg-emerald-400 px-8 py-4 text-center text-sm font-bold text-slate-950 transition hover:bg-emerald-300 sm:w-auto">Create Referral Page</a>
+          <a href="/map" class="w-full rounded-full border border-white/20 px-8 py-4 text-center text-sm font-bold text-white transition hover:bg-white/10 sm:w-auto">View Map</a>
+          <a href="/app/" class="w-full rounded-full border border-sky-400/40 bg-sky-400/10 px-8 py-4 text-center text-sm font-bold text-sky-100 transition hover:bg-sky-400/20 sm:w-auto">Check Floor Plan</a>
+        </div>
+      </div>
+    </section>
 
-<section class="grid md:grid-cols-3 gap-8 px-8 py-16 max-w-6xl mx-auto">
-<div class="border rounded-2xl p-6"><h3 class="font-bold text-lg mb-2">✅ CREATE</h3><p class="text-sm text-gray-600">Your referral page thelo.fyi/r/your-home, Title 22 PASS report, pricing sheet, LPA checklist. No PHI.</p></div>
-<div class="border rounded-2xl p-6"><h3 class="font-bold text-lg mb-2">🔍 FIND</h3><p class="text-sm text-gray-600">Clients searching RCFE Fresno, placement agents needing beds TODAY, families comparing - you show Thelo Verified.</p></div>
-<div class="border rounded-2xl p-6"><h3 class="font-bold text-lg mb-2">🧠 REMEMBER</h3><p class="text-sm text-gray-600">Every room size, bed count, care level - never measure again - stored in Cloudflare KV.</p></div>
-</section>
+    <section class="mx-auto grid max-w-6xl gap-6 px-6 py-16 md:grid-cols-3">
+      <article class="rounded-3xl border border-white/10 bg-white/5 p-8">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">Create</p>
+        <h2 class="mt-4 text-2xl font-bold text-white">Launch a verified referral page</h2>
+        <p class="mt-4 text-sm leading-7 text-slate-300">Publish your beds, pricing, room sizes, and compliance status in minutes with a permanent Thelo link.</p>
+      </article>
+      <article class="rounded-3xl border border-white/10 bg-white/5 p-8">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-sky-300">Find</p>
+        <h2 class="mt-4 text-2xl font-bold text-white">Show up for families and agents</h2>
+        <p class="mt-4 text-sm leading-7 text-slate-300">Display live availability on the Fresno map so placement agents can see open beds right away.</p>
+      </article>
+      <article class="rounded-3xl border border-white/10 bg-white/5 p-8">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-violet-300">Remember</p>
+        <h2 class="mt-4 text-2xl font-bold text-white">Keep Title 22 details organized</h2>
+        <p class="mt-4 text-sm leading-7 text-slate-300">Track room measurements, single and shared capacity, and compliance checks without storing PHI.</p>
+      </article>
+    </section>
 
-<section class="bg-black text-white py-16 px-8">
-<div class="max-w-5xl mx-auto grid md:grid-cols-4 gap-6 text-center">
-<div class="border border-white/20 rounded-xl p-6"><div class="font-bold">$199/mo Pro</div><div class="text-xs mt-2 text-white/60">Memory + Title 22 + 1 referral link</div></div>
-<div class="border border-white/20 rounded-xl p-6 bg-white text-black"><div class="font-bold">$299/mo Growth</div><div class="text-xs mt-2">Map + Verified + daily email to 20 agents</div></div>
-<div class="border border-white/20 rounded-xl p-6"><div class="font-bold">$99/mo Agent</div><div class="text-xs mt-2 text-white/60">Live map + calls + verified filter</div></div>
-<div class="border border-white/20 rounded-xl p-6"><div class="font-bold">$1750 placement</div><div class="text-xs mt-2 text-white/60">Per filled bed fee</div></div>
-</div>
-</section>
+    <section class="border-y border-white/10 bg-white/5">
+      <div class="mx-auto max-w-6xl px-6 py-16">
+        <div class="mb-10 flex items-end justify-between gap-6">
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Pricing</p>
+            <h2 class="mt-3 text-3xl font-bold text-white">Choose the right growth lane</h2>
+          </div>
+        </div>
+        <div class="grid gap-6 md:grid-cols-4">
+          <div class="rounded-3xl border border-white/10 bg-slate-950 p-6">
+            <p class="text-sm text-slate-400">Pro</p>
+            <p class="mt-3 text-3xl font-black text-white">$199</p>
+          </div>
+          <div class="rounded-3xl border border-emerald-300/40 bg-emerald-300/10 p-6">
+            <p class="text-sm text-emerald-100">Growth</p>
+            <p class="mt-3 text-3xl font-black text-white">$299</p>
+          </div>
+          <div class="rounded-3xl border border-white/10 bg-slate-950 p-6">
+            <p class="text-sm text-slate-400">Agent</p>
+            <p class="mt-3 text-3xl font-black text-white">$99</p>
+          </div>
+          <div class="rounded-3xl border border-white/10 bg-slate-950 p-6">
+            <p class="text-sm text-slate-400">Placement</p>
+            <p class="mt-3 text-3xl font-black text-white">$1750</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-<footer class="text-center py-8 text-xs text-gray-500">No PHI - No BAA - Built on Cloudflare Workers KV - thelo.fyi is referral network not licensed facility</footer>
+  <footer class="px-6 py-8 text-center text-xs uppercase tracking-[0.2em] text-slate-500">
+    No PHI • No BAA
+  </footer>
 </body>
 </html>

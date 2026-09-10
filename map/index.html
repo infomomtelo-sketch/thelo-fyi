@@ -1,252 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thelo Map</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Lo - Facility Map</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  #map { height: 100vh; }
+  #facilityList { max-height: 100vh; overflow-y: auto; }
+</style>
 </head>
-<body class="min-h-screen bg-slate-950 text-slate-100">
-  <a href="/" style="position:fixed;top:16px;left:16px;z-index:99999;background:#2563eb;color:white;padding:8px 16px;border-radius:999px;text-decoration:none;font-family:system-ui;font-weight:600;box-shadow:0 8px 24px rgba(37,99,235,0.35)">← Home</a>
-  <div style="height:56px"></div>
-  <div class="bg-amber-300 px-6 py-3 text-center text-sm font-black text-slate-950">For Agents $99/mo</div>
-  <main class="mx-auto max-w-7xl px-6 py-8">
-    <div class="mb-6 flex items-center justify-between gap-4">
-      <div>
-        <p class="text-sm uppercase tracking-[0.2em] text-slate-400">Live availability</p>
-        <h1 class="mt-2 text-3xl font-black text-white">Fresno facility map</h1>
-      </div>
-      <a href="/agent/" class="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200">Get Agent Access</a>
-    </div>
-    <div class="grid gap-6 lg:grid-cols-[320px,1fr]">
-      <aside class="rounded-3xl border border-white/10 bg-white/5 p-4">
-        <div id="facilityList" class="space-y-4"></div>
-      </aside>
-      <section class="overflow-hidden rounded-3xl border border-white/10">
-        <div id="map" class="h-[70vh] w-full" style="pointer-events:auto"></div>
-      </section>
-    </div>
-  </main>
+<body class="bg-gray-900 text-white flex">
 
-  <footer class="border-t border-white/10 px-6 py-8 text-center text-xs text-slate-500">
-    © 2026 thelo.fyi • A product of EC Rental Property Management LLC
-    <span class="mx-2">•</span><a href="/privacy/" class="hover:text-slate-300">Privacy</a>
-    <span class="mx-2">•</span><a href="/terms/" class="hover:text-slate-300">Terms</a>
-    <span class="mx-2">•</span><a href="/disclaimer/" class="hover:text-slate-300">Disclaimer</a>
-  </footer>
+<!-- LIST -->
+<div class="w-full md:w-96 p-4 bg-gray-900 z-10 overflow-hidden flex flex-col">
+  <h1 class="font-bold text-xl mb-4">Fresno Care Facilities</h1>
+  <div id="facilityList" class="flex-1">Loading...</div>
+</div>
 
-  <div id="facilityModal" class="fixed inset-x-0 bottom-0 z-[99999] hidden px-4 pb-4 lg:inset-0 lg:flex lg:items-center lg:justify-center" aria-hidden="true">
-    <div class="w-full max-w-xl rounded-t-3xl border border-white/10 bg-slate-950 p-5 shadow-2xl lg:rounded-3xl" role="dialog" aria-modal="true">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Facility details</p>
-          <h2 id="modalName" class="mt-1 text-2xl font-black text-white"></h2>
-        </div>
-        <button id="closeFacilityModal" type="button" class="rounded-full border border-white/10 px-3 py-2 text-sm font-semibold text-slate-200">Close</button>
-      </div>
-      <div class="mt-4 space-y-3 text-sm text-slate-200">
-        <p><span class="text-slate-400">Address:</span> <span id="modalAddress"></span></p>
-        <p><span class="text-slate-400">Beds available:</span> <span id="modalBeds"></span></p>
-        <p><span class="text-slate-400">Care level:</span> <span id="modalCare"></span></p>
-        <p><span class="text-slate-400">Phone:</span> <a id="modalPhone" class="text-sky-300 underline" href="#"></a></p>
-        <p><span class="text-slate-400">Last updated:</span> <span id="modalUpdated"></span></p>
-      </div>
-      <div class="mt-5 flex flex-col gap-3 sm:flex-row">
-        <a id="callFacilityButton" href="#" class="inline-flex items-center justify-center rounded-full bg-emerald-400 px-4 py-3 text-sm font-bold text-slate-950">Call Facility</a>
-      </div>
+<!-- MAP -->
+<div id="map" class="flex-1"></div>
+
+<!-- MODAL - must be in DOM with these IDs -->
+<div id="facilityModal" class="hidden fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-md border border-gray-700">
+    <div class="flex justify-between items-center">
+      <h2 id="modalName" class="font-bold text-white text-lg">FACILITY DETAILS</h2>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-white px-2">Close</button>
     </div>
+    <div class="mt-4 text-sm text-gray-300 space-y-2">
+      <div>Address: <span id="modalAddress" class="text-white"></span></div>
+      <div>Beds available: <span id="modalBeds" class="text-white font-bold"></span></div>
+      <div>Care level: <span id="modalCare"></span></div>
+      <div>Phone: <span id="modalPhone"></span></div>
+      <div class="text-xs text-gray-500">Last updated: <span id="modalUpdated"></span></div>
+    </div>
+    <a id="callBtn" href="#" class="mt-6 inline-block bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full font-bold">Call Facility</a>
   </div>
+</div>
 
-  <script>
-    let facilitiesData = [];
-    const FACILITIES_API_URLS = ["https://thelo.fyi/api/facilities", "/api/facilities"];
-    const FACILITY_API_BASES = ["https://thelo.fyi/api/facility", "/api/facility"];
+<script>
+window.facilities = [];
+let map;
+let markers = [];
 
-    const demoFacilities = [
-      { id: 1, name: "Fresno Garden House", address: "1234 N Cedar Ave, Fresno, CA 93703", beds_available: 2, care_level: "RCFE", phone: "(559) 555-0101", last_updated: "2026-09-10T00:00:00Z", lat: 36.7378, lng: -119.7871, slug: "fresno-garden-house" },
-      { id: 2, name: "Fig Garden Care", address: "4567 W Shaw Ave, Fresno, CA 93711", beds_available: 0, care_level: "RCFE", phone: "(559) 555-0102", last_updated: "2026-09-10T00:00:00Z", lat: 36.8082, lng: -119.8318, slug: "fig-garden-care" },
-      { id: 3, name: "Central Valley Retreat", address: "7890 E Olive Ave, Fresno, CA 93720", beds_available: 1, care_level: "RCFE", phone: "(559) 555-0103", last_updated: "2026-09-10T00:00:00Z", lat: 36.7712, lng: -119.7451, slug: "central-valley-retreat" }
-    ];
+function initMap() {
+  map = L.map('map').setView([36.7378, -119.7871], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+}
 
-    const map = L.map("map").setView([36.7378, -119.7871], 12);
-    const markerLayer = L.layerGroup().addTo(map);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors"
-    }).addTo(map);
+function renderMarkers(list) {
+  if (!map) initMap();
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+  list.forEach(f => {
+    if (!f.lat ||!f.lng) return;
+    const m = L.marker([f.lat, f.lng]).addTo(map);
+    m.on('click', () => window.openFacility(f.id));
+    markers.push(m);
+  });
+}
 
-    const markerClass = `
-      <style>
-        .facility-card { pointer-events: auto; cursor: pointer; }
-        .thelo-pin {
-          width: 18px;
-          height: 18px;
-          border-radius: 9999px;
-          border: 3px solid white;
-          box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.35);
-        }
-        .thelo-pin.available { background: #34d399; }
-        .thelo-pin.full { background: #94a3b8; }
-      </style>
-    `;
-    document.head.insertAdjacentHTML("beforeend", markerClass);
+function renderCards(list) {
+  const el = document.getElementById('facilityList');
+  if (!list.length) {
+    el.innerHTML = '<div class="text-gray-400 text-sm">No facilities found</div>';
+    return;
+  }
+  el.innerHTML = list.map(f => `
+    <div onclick="window.openFacility('${f.id}')" class="cursor-pointer pointer-events-auto p-4 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 mb-3 transition">
+      <div class="font-bold text-white">${f.name || 'Unnamed Facility'}</div>
+      <div class="text-xs text-gray-400 truncate">${f.address || ''}</div>
+      <div class="mt-2 text-sm">
+        <span class="px-2 py-1 rounded-full ${f.beds_available>0?'bg-green-500':'bg-gray-600'} text-white text-xs">
+          ${f.beds_available>0? f.beds_available + ' Beds' : 'Full'}
+        </span>
+        <span class="ml-2 text-gray-400 text-xs">${f.care_level || ''}</span>
+      </div>
+      <div class="text-xs mt-1 text-gray-500">${f.phone || ''}</div>
+    </div>
+  `).join('');
+}
 
-    const greenIcon = L.divIcon({ html: '<div class="thelo-pin available"></div>', className: "", iconSize: [18, 18], iconAnchor: [9, 9] });
-    const grayIcon = L.divIcon({ html: '<div class="thelo-pin full"></div>', className: "", iconSize: [18, 18], iconAnchor: [9, 9] });
+window.openFacility = function(id) {
+  console.log('openFacility', id, window.facilities.length);
+  const f = window.facilities.find(x => String(x.id) === String(id) || x.slug === id);
+  if (!f) {
+    console.error('facility not found', id);
+    return;
+  }
+  document.getElementById('modalName').innerText = f.name || 'Unnamed Facility';
+  document.getElementById('modalAddress').innerText = f.address || '';
+  document.getElementById('modalBeds').innerText = f.beds_available?? '0';
+  document.getElementById('modalCare').innerText = f.care_level || '';
+  document.getElementById('modalPhone').innerText = f.phone || 'No phone listed';
+  document.getElementById('modalUpdated').innerText = f.last_updated || new Date().toISOString().split('T')[0];
 
-    function escapeHtml(value) {
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
+  const callBtn = document.getElementById('callBtn');
+  if (f.phone && f.phone.trim()) {
+    callBtn.href = `tel:${f.phone}`;
+    callBtn.classList.remove('opacity-50','pointer-events-none');
+    callBtn.innerText = 'Call Facility';
+  } else {
+    callBtn.href = 'javascript:void(0)';
+    callBtn.classList.add('opacity-50','pointer-events-none');
+    callBtn.innerText = 'No phone listed';
+  }
 
-    function formatUpdated(value) {
-      if (!value) return "Unknown";
-      const date = new Date(value);
-      return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
-    }
+  document.getElementById('facilityModal').classList.remove('hidden');
+}
 
-    function normalizeFacility(facility, index) {
-      return {
-        id: String(facility.id || facility.slug || facility.name || facility.facilityName || `facility-${index + 1}`),
-        slug: String(facility.slug || facility.id || ""),
-        name: facility.name || facility.facilityName || "Unknown facility",
-        address: facility.address || "Address unavailable",
-        beds_available: Number(facility.beds_available ?? facility.availableBeds ?? 0),
-        care_level: facility.care_level || facility.careLevel || "RCFE",
-        phone: facility.phone || "",
-        last_updated: facility.last_updated || facility.updatedAt || "",
-        lat: Number(facility.lat ?? [36.7378, 36.8082, 36.7712][index] ?? 36.7378),
-        lng: Number(facility.lng ?? [-119.7871, -119.8318, -119.7451][index] ?? -119.7871)
-      };
-    }
+function closeModal() {
+  document.getElementById('facilityModal').classList.add('hidden');
+}
 
-    function normalizeFacilities(items) {
-      const source = Array.isArray(items) ? items : items?.facilities || demoFacilities;
-      return source.map(normalizeFacility);
-    }
+async function loadFacilities() {
+  try {
+    const res = await fetch('https://thelo.fyi/api/facilities');
+    const data = await res.json();
+    window.facilities = data.facilities || data || [];
+    console.log('loaded', window.facilities.length);
+    renderCards(window.facilities);
+    renderMarkers(window.facilities);
+  } catch(e) {
+    console.error(e);
+    document.getElementById('facilityList').innerHTML = '<div class="text-red-400 text-sm">Failed to load</div>';
+  }
+}
 
-    async function fetchJson(url) {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Request failed: ${url}`);
-      return response.json();
-    }
+initMap();
+loadFacilities();
 
-    async function fetchFirst(urls) {
-      let lastError = new Error("No facility source available");
-      for (const url of urls) {
-        try {
-          return await fetchJson(url);
-        } catch (error) {
-          lastError = error;
-        }
-      }
-      throw lastError;
-    }
-
-    function applyFacilityToModal(facility) {
-      const phone = String(facility.phone || "").trim();
-      const dialablePhone = phone.replace(/[^\d+]/g, "");
-      document.getElementById("modalName").textContent = facility.name;
-      document.getElementById("modalAddress").textContent = facility.address;
-      document.getElementById("modalBeds").textContent = String(facility.beds_available);
-      document.getElementById("modalCare").textContent = facility.care_level;
-      document.getElementById("modalPhone").textContent = phone || "Not provided";
-      document.getElementById("modalPhone").href = dialablePhone ? `tel:${dialablePhone}` : "tel:";
-      document.getElementById("modalUpdated").textContent = formatUpdated(facility.last_updated);
-      document.getElementById("callFacilityButton").href = dialablePhone ? `tel:${dialablePhone}` : "tel:";
-    }
-
-    async function fetchFacilityDetail(id) {
-      let lastError = new Error("Facility detail unavailable");
-      for (const base of FACILITY_API_BASES) {
-        try {
-          const data = await fetchJson(`${base}?id=${encodeURIComponent(id)}`);
-          return normalizeFacility(data, 0);
-        } catch (error) {
-          lastError = error;
-        }
-      }
-
-      const fallback = facilitiesData.find((item) => String(item.id) === String(id));
-      if (fallback) return fallback;
-      throw lastError;
-    }
-
-    async function openFacility(id) {
-      const facility = await fetchFacilityDetail(id).catch(() => facilitiesData.find((item) => String(item.id) === String(id)));
-      if (!facility) return;
-      applyFacilityToModal(facility);
-      const modal = document.getElementById("facilityModal");
-      modal.classList.remove("hidden");
-      modal.setAttribute("aria-hidden", "false");
-    }
-
-    function closeFacility() {
-      const modal = document.getElementById("facilityModal");
-      modal.classList.add("hidden");
-      modal.setAttribute("aria-hidden", "true");
-    }
-
-    document.getElementById("closeFacilityModal").addEventListener("click", closeFacility);
-    document.getElementById("facilityModal").addEventListener("click", (event) => {
-      if (event.target.id === "facilityModal") closeFacility();
-    });
-
-    async function fetchFacilities() {
-      try {
-        return normalizeFacilities(await fetchFirst(FACILITIES_API_URLS));
-      } catch (_) {
-        try {
-          return normalizeFacilities(await fetchJson("/data/availability.json"));
-        } catch (_) {
-          return demoFacilities;
-        }
-      }
-    }
-
-    function renderFacilities(facilities) {
-      facilitiesData = facilities;
-      markerLayer.clearLayers();
-      const list = document.getElementById("facilityList");
-      list.innerHTML = facilities.map((facility) => `
-        <article class="facility-card rounded-2xl border border-white/10 bg-slate-950/80 p-4" data-id="${escapeHtml(facility.id)}" style="cursor:pointer">
-          <div class="flex items-center justify-between gap-3">
-            <h2 class="font-semibold text-white">${escapeHtml(facility.name)}</h2>
-            <span class="rounded-full px-3 py-1 text-xs font-bold ${facility.beds_available > 0 ? "bg-emerald-400 text-slate-950" : "bg-slate-600 text-white"}">${facility.beds_available > 0 ? "Available" : "Full"}</span>
-          </div>
-          <p class="mt-2 text-sm text-slate-300">${escapeHtml(facility.address)}</p>
-          <p class="mt-1 text-sm text-slate-300">${facility.beds_available} beds open • ${escapeHtml(facility.care_level)} • ${escapeHtml(facility.phone || "Phone unavailable")}</p>
-          <p class="mt-1 text-xs text-slate-500">Updated ${escapeHtml(formatUpdated(facility.last_updated))}</p>
-        </article>
-      `).join("");
-      list.querySelectorAll("[data-id]").forEach((card) => {
-        card.addEventListener("click", () => openFacility(card.dataset.id));
-      });
-
-      facilities.forEach((facility) => {
-        const marker = L.marker([facility.lat, facility.lng], {
-          icon: facility.beds_available > 0 ? greenIcon : grayIcon
-        }).addTo(markerLayer);
-        marker.on("click", () => openFacility(facility.id));
-        marker.bindPopup(`
-          <div class="space-y-2">
-            <strong>${escapeHtml(facility.name)}</strong>
-            <div>${escapeHtml(facility.address)}</div>
-            <div>${facility.beds_available} beds open • ${escapeHtml(facility.care_level)}</div>
-            <div>${escapeHtml(facility.phone || "Phone unavailable")}</div>
-          </div>
-        `);
-      });
-    }
-
-    fetchFacilities().then(renderFacilities);
-    window.openFacility = openFacility;
-  </script>
+// close modal on background click
+document.getElementById('facilityModal').addEventListener('click', (e) => {
+  if (e.target.id === 'facilityModal') closeModal();
+});
+</script>
 </body>
 </html>

@@ -1,41 +1,56 @@
 const DEMO_FACILITIES = [
   {
+    id: 1,
     facilityName: "Fresno Garden House",
     slug: "fresno-garden-house",
+    address: "1234 N Cedar Ave, Fresno, CA 93703",
     totalBeds: 6,
     availableBeds: 2,
+    care_level: "RCFE",
+    phone: "(559) 555-0101",
     price: 3500,
     lat: 36.7378,
     lng: -119.7871,
     complianceStatus: "PASS",
+    last_updated: "2026-09-10T00:00:00Z",
     rooms: [
       { name: "Room A", beds: 1, sqft: 110, requiredSqft: 80, status: "PASS" },
       { name: "Room B", beds: 2, sqft: 140, requiredSqft: 120, status: "PASS" }
     ]
   },
   {
+    id: 2,
     facilityName: "Fig Garden Care",
     slug: "fig-garden-care",
+    address: "4567 W Shaw Ave, Fresno, CA 93711",
     totalBeds: 4,
     availableBeds: 0,
+    care_level: "RCFE",
+    phone: "(559) 555-0102",
     price: 4200,
     lat: 36.8082,
     lng: -119.8318,
     complianceStatus: "PASS",
+    last_updated: "2026-09-10T00:00:00Z",
     rooms: [
       { name: "Front Suite", beds: 1, sqft: 104, requiredSqft: 80, status: "PASS" },
       { name: "Shared Wing", beds: 2, sqft: 150, requiredSqft: 120, status: "PASS" }
     ]
   },
   {
+    id: 3,
     facilityName: "Central Valley Retreat",
     slug: "central-valley-retreat",
+    address: "7890 E Olive Ave, Fresno, CA 93720",
     totalBeds: 5,
     availableBeds: 1,
+    care_level: "RCFE",
+    phone: "(559) 555-0103",
     price: 3900,
     lat: 36.7712,
     lng: -119.7451,
     complianceStatus: "PASS",
+    last_updated: "2026-09-10T00:00:00Z",
     rooms: [
       { name: "Sunrise", beds: 1, sqft: 90, requiredSqft: 80, status: "PASS" },
       { name: "Orchard", beds: 2, sqft: 132, requiredSqft: 120, status: "PASS" }
@@ -88,6 +103,43 @@ function normalizeSlug(slug) {
     .replace(/^-+|-+$/g, "");
 }
 
+function publicFacilityId(facility) {
+  return String(facility?.id || facility?.slug || facility?.facilityName || facility?.name || "").trim();
+}
+
+function toPublicFacility(facility) {
+  const id = publicFacilityId(facility) || normalizeSlug(facility?.facilityName || facility?.name);
+  const slug = normalizeSlug(facility?.slug || id);
+  const name = String(facility?.name || facility?.facilityName || "").trim();
+  const bedsAvailable = Number(facility?.beds_available ?? facility?.availableBeds ?? 0);
+  const lastUpdated = facility?.last_updated || facility?.updatedAt || new Date().toISOString();
+
+  return {
+    id,
+    slug,
+    name,
+    address: String(facility?.address || "").trim(),
+    beds_available: Number.isFinite(bedsAvailable) ? bedsAvailable : 0,
+    care_level: String(facility?.care_level || facility?.careLevel || "RCFE").trim() || "RCFE",
+    phone: String(facility?.phone || "").trim(),
+    last_updated: lastUpdated,
+    lat: Number(facility?.lat ?? 36.7378),
+    lng: Number(facility?.lng ?? -119.7871),
+    total_beds: Number(facility?.totalBeds ?? 0),
+    price: Number(facility?.price ?? 0),
+    compliance_status: facility?.complianceStatus || "PASS",
+    rooms: Array.isArray(facility?.rooms) ? facility.rooms : []
+  };
+}
+
+function matchesFacility(facility, value) {
+  if (!value) return false;
+  const normalized = normalizeSlug(value);
+  return [facility.id, facility.slug, facility.name]
+    .filter(Boolean)
+    .some((candidate) => String(candidate) === String(value) || normalizeSlug(candidate) === normalized);
+}
+
 function hasPhi(payload) {
   const raw = JSON.stringify(payload || {});
   return PHI_PATTERNS.some((pattern) => pattern.test(raw));
@@ -96,12 +148,17 @@ function hasPhi(payload) {
 function sanitizeFacility(payload) {
   const facilityName = String(payload.facilityName || "").trim();
   const slug = normalizeSlug(payload.slug || facilityName);
+  const id = String(payload.id || slug).trim() || slug;
   const totalBeds = Number(payload.totalBeds || 0);
   const availableBeds = Number(payload.availableBeds || 0);
   const price = Number(payload.price || 0);
   const lat = Number(payload.lat || 36.7378);
   const lng = Number(payload.lng || -119.7871);
+  const address = String(payload.address || "").trim();
+  const careLevel = String(payload.care_level || payload.careLevel || "RCFE").trim() || "RCFE";
+  const phone = String(payload.phone || "").trim();
   const rooms = Array.isArray(payload.rooms) ? payload.rooms : [];
+  const timestamp = new Date().toISOString();
 
   const normalizedRooms = rooms.map((room, index) => {
     const beds = Math.max(1, Number(room.beds || 1));
@@ -136,10 +193,14 @@ function sanitizeFacility(payload) {
   }
 
   return {
+    id,
     facilityName,
     slug,
+    address,
     totalBeds,
     availableBeds,
+    care_level: careLevel,
+    phone,
     price,
     lat,
     lng,
@@ -150,7 +211,8 @@ function sanitizeFacility(payload) {
       type: String(payload.floorPlan.type || "")
     } : null,
     rooms: normalizedRooms,
-    updatedAt: new Date().toISOString()
+    updatedAt: timestamp,
+    last_updated: timestamp
   };
 }
 
@@ -196,18 +258,27 @@ export default {
     }
 
     if (url.pathname === "/api/facility" && request.method === "GET") {
-      const slug = normalizeSlug(url.searchParams.get("slug"));
-      if (!slug) {
-        return json({ error: "Slug is required." }, 400, origin);
+      const id = String(url.searchParams.get("id") || "").trim();
+      const slug = String(url.searchParams.get("slug") || "").trim();
+      const lookupValue = id || slug;
+
+      if (!lookupValue) {
+        return json({ error: "id is required." }, 400, origin);
       }
-      const stored = await env.FACILITIES.get(slug, "json");
-      const fallback = DEMO_FACILITIES.find((facility) => facility.slug === slug) || DEMO_FACILITIES[0];
-      return json({ facility: stored || fallback }, 200, origin);
+
+      const facilities = await listStoredFacilities(env);
+      const found = facilities.find((facility) => matchesFacility(toPublicFacility(facility), lookupValue));
+
+      if (!found) {
+        return json({ error: "Facility not found." }, 404, origin);
+      }
+
+      return json(toPublicFacility(found), 200, origin);
     }
 
     if (url.pathname === "/api/facilities" && request.method === "GET") {
       const facilities = await listStoredFacilities(env);
-      return json({ facilities }, 200, origin);
+      return json(facilities.map((facility) => toPublicFacility(facility)), 200, origin);
     }
 
     return json({ error: "Not found." }, 404, origin);

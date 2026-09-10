@@ -16,7 +16,7 @@ Static marketing and facility-listing site for Thelo, built with vanilla HTML, T
 `worker.js` exposes:
 
 - `POST /api/facility`
-- `GET /api/facility?slug=...`
+- `GET /api/facility?id=...` (also accepts `slug=...`)
 - `GET /api/facilities`
 
 The worker expects a Cloudflare KV binding named `FACILITIES`.

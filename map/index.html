@@ -54,14 +54,17 @@
 
   <script>
     let facilitiesData = [];
+    const FACILITIES_API_URLS = ["https://thelo.fyi/api/facilities", "/api/facilities"];
+    const FACILITY_API_BASES = ["https://thelo.fyi/api/facility", "/api/facility"];
 
     const demoFacilities = [
-      { id: 1, name: "Fresno Garden House", address: "1234 N Cedar Ave, Fresno, CA 93703", beds_available: 2, care_level: "RCFE", phone: "(559) 555-0101", last_updated: "2026-09-10T00:00:00Z", lat: 36.7378, lng: -119.7871 },
-      { id: 2, name: "Fig Garden Care", address: "4567 W Shaw Ave, Fresno, CA 93711", beds_available: 0, care_level: "RCFE", phone: "(559) 555-0102", last_updated: "2026-09-10T00:00:00Z", lat: 36.8082, lng: -119.8318 },
-      { id: 3, name: "Central Valley Retreat", address: "7890 E Olive Ave, Fresno, CA 93720", beds_available: 1, care_level: "RCFE", phone: "(559) 555-0103", last_updated: "2026-09-10T00:00:00Z", lat: 36.7712, lng: -119.7451 }
+      { id: 1, name: "Fresno Garden House", address: "1234 N Cedar Ave, Fresno, CA 93703", beds_available: 2, care_level: "RCFE", phone: "(559) 555-0101", last_updated: "2026-09-10T00:00:00Z", lat: 36.7378, lng: -119.7871, slug: "fresno-garden-house" },
+      { id: 2, name: "Fig Garden Care", address: "4567 W Shaw Ave, Fresno, CA 93711", beds_available: 0, care_level: "RCFE", phone: "(559) 555-0102", last_updated: "2026-09-10T00:00:00Z", lat: 36.8082, lng: -119.8318, slug: "fig-garden-care" },
+      { id: 3, name: "Central Valley Retreat", address: "7890 E Olive Ave, Fresno, CA 93720", beds_available: 1, care_level: "RCFE", phone: "(559) 555-0103", last_updated: "2026-09-10T00:00:00Z", lat: 36.7712, lng: -119.7451, slug: "central-valley-retreat" }
     ];
 
     const map = L.map("map").setView([36.7378, -119.7871], 12);
+    const markerLayer = L.layerGroup().addTo(map);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution: "&copy; OpenStreetMap contributors"
@@ -86,25 +89,92 @@
     const greenIcon = L.divIcon({ html: '<div class="thelo-pin available"></div>', className: "", iconSize: [18, 18], iconAnchor: [9, 9] });
     const grayIcon = L.divIcon({ html: '<div class="thelo-pin full"></div>', className: "", iconSize: [18, 18], iconAnchor: [9, 9] });
 
-    function normalizeFacilities(items) {
-      return items.map((facility, index) => ({
-        ...facility,
-        lat: facility.lat ?? [36.7378, 36.8082, 36.7712][index] ?? 36.7378,
-        lng: facility.lng ?? [-119.7871, -119.8318, -119.7451][index] ?? -119.7871
-      }));
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
     }
 
-    function openFacility(id) {
-      const facility = facilitiesData.find((item) => String(item.id) === String(id));
-      if (!facility) return;
+    function formatUpdated(value) {
+      if (!value) return "Unknown";
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+    }
+
+    function normalizeFacility(facility, index) {
+      return {
+        id: String(facility.id || facility.slug || facility.name || facility.facilityName || `facility-${index + 1}`),
+        slug: String(facility.slug || facility.id || ""),
+        name: facility.name || facility.facilityName || "Unknown facility",
+        address: facility.address || "Address unavailable",
+        beds_available: Number(facility.beds_available ?? facility.availableBeds ?? 0),
+        care_level: facility.care_level || facility.careLevel || "RCFE",
+        phone: facility.phone || "",
+        last_updated: facility.last_updated || facility.updatedAt || "",
+        lat: Number(facility.lat ?? [36.7378, 36.8082, 36.7712][index] ?? 36.7378),
+        lng: Number(facility.lng ?? [-119.7871, -119.8318, -119.7451][index] ?? -119.7871)
+      };
+    }
+
+    function normalizeFacilities(items) {
+      const source = Array.isArray(items) ? items : items?.facilities || demoFacilities;
+      return source.map(normalizeFacility);
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Request failed: ${url}`);
+      return response.json();
+    }
+
+    async function fetchFirst(urls) {
+      let lastError = new Error("No facility source available");
+      for (const url of urls) {
+        try {
+          return await fetchJson(url);
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError;
+    }
+
+    function applyFacilityToModal(facility) {
+      const phone = String(facility.phone || "").trim();
+      const dialablePhone = phone.replace(/[^\d+]/g, "");
       document.getElementById("modalName").textContent = facility.name;
       document.getElementById("modalAddress").textContent = facility.address;
-      document.getElementById("modalBeds").textContent = facility.beds_available;
+      document.getElementById("modalBeds").textContent = String(facility.beds_available);
       document.getElementById("modalCare").textContent = facility.care_level;
-      document.getElementById("modalPhone").textContent = facility.phone;
-      document.getElementById("modalPhone").href = `tel:${String(facility.phone).replace(/[^\d+]/g, "")}`;
-      document.getElementById("modalUpdated").textContent = facility.last_updated;
-      document.getElementById("callFacilityButton").href = `tel:${String(facility.phone).replace(/[^\d+]/g, "")}`;
+      document.getElementById("modalPhone").textContent = phone || "Not provided";
+      document.getElementById("modalPhone").href = dialablePhone ? `tel:${dialablePhone}` : "tel:";
+      document.getElementById("modalUpdated").textContent = formatUpdated(facility.last_updated);
+      document.getElementById("callFacilityButton").href = dialablePhone ? `tel:${dialablePhone}` : "tel:";
+    }
+
+    async function fetchFacilityDetail(id) {
+      let lastError = new Error("Facility detail unavailable");
+      for (const base of FACILITY_API_BASES) {
+        try {
+          const data = await fetchJson(`${base}?id=${encodeURIComponent(id)}`);
+          return normalizeFacility(data, 0);
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      const fallback = facilitiesData.find((item) => String(item.id) === String(id));
+      if (fallback) return fallback;
+      throw lastError;
+    }
+
+    async function openFacility(id) {
+      const facility = await fetchFacilityDetail(id).catch(() => facilitiesData.find((item) => String(item.id) === String(id)));
+      if (!facility) return;
+      applyFacilityToModal(facility);
       const modal = document.getElementById("facilityModal");
       modal.classList.remove("hidden");
       modal.setAttribute("aria-hidden", "false");
@@ -123,41 +193,46 @@
 
     async function fetchFacilities() {
       try {
-        const response = await fetch("/data/availability.json");
-        if (!response.ok) throw new Error("Availability data unavailable");
-        const data = await response.json();
-        return normalizeFacilities(Array.isArray(data) ? data : data.facilities || demoFacilities);
+        return normalizeFacilities(await fetchFirst(FACILITIES_API_URLS));
       } catch (_) {
-        return demoFacilities;
+        try {
+          return normalizeFacilities(await fetchJson("/data/availability.json"));
+        } catch (_) {
+          return demoFacilities;
+        }
       }
     }
 
     function renderFacilities(facilities) {
       facilitiesData = facilities;
+      markerLayer.clearLayers();
       const list = document.getElementById("facilityList");
       list.innerHTML = facilities.map((facility) => `
-        <article class="facility-card rounded-2xl border border-white/10 bg-slate-950/80 p-4" data-id="${facility.id}" onclick="openFacility(${facility.id})" style="cursor:pointer">
+        <article class="facility-card rounded-2xl border border-white/10 bg-slate-950/80 p-4" data-id="${escapeHtml(facility.id)}" style="cursor:pointer">
           <div class="flex items-center justify-between gap-3">
-            <h2 class="font-semibold text-white">${facility.name}</h2>
+            <h2 class="font-semibold text-white">${escapeHtml(facility.name)}</h2>
             <span class="rounded-full px-3 py-1 text-xs font-bold ${facility.beds_available > 0 ? "bg-emerald-400 text-slate-950" : "bg-slate-600 text-white"}">${facility.beds_available > 0 ? "Available" : "Full"}</span>
           </div>
-          <p class="mt-2 text-sm text-slate-300">${facility.address}</p>
-          <p class="mt-1 text-sm text-slate-300">${facility.beds_available} beds open • ${facility.care_level} • ${facility.phone}</p>
-          <p class="mt-1 text-xs text-slate-500">Updated ${facility.last_updated}</p>
+          <p class="mt-2 text-sm text-slate-300">${escapeHtml(facility.address)}</p>
+          <p class="mt-1 text-sm text-slate-300">${facility.beds_available} beds open • ${escapeHtml(facility.care_level)} • ${escapeHtml(facility.phone || "Phone unavailable")}</p>
+          <p class="mt-1 text-xs text-slate-500">Updated ${escapeHtml(formatUpdated(facility.last_updated))}</p>
         </article>
       `).join("");
+      list.querySelectorAll("[data-id]").forEach((card) => {
+        card.addEventListener("click", () => openFacility(card.dataset.id));
+      });
 
       facilities.forEach((facility) => {
         const marker = L.marker([facility.lat, facility.lng], {
           icon: facility.beds_available > 0 ? greenIcon : grayIcon
-        }).addTo(map);
-        marker.on('click', () => openFacility(facility.id));
+        }).addTo(markerLayer);
+        marker.on("click", () => openFacility(facility.id));
         marker.bindPopup(`
           <div class="space-y-2">
-            <strong>${facility.name}</strong>
-            <div>${facility.address}</div>
-            <div>${facility.beds_available} beds open • ${facility.care_level}</div>
-            <div>${facility.phone}</div>
+            <strong>${escapeHtml(facility.name)}</strong>
+            <div>${escapeHtml(facility.address)}</div>
+            <div>${facility.beds_available} beds open • ${escapeHtml(facility.care_level)}</div>
+            <div>${escapeHtml(facility.phone || "Phone unavailable")}</div>
           </div>
         `);
       });

@@ -340,8 +340,9 @@
         const response = await postFacility(payload);
         statusEl.textContent = "Saved locally and synced to Thelo.";
         linksCard.classList.remove("hidden");
-        referralLink.href = `/r/?f=${response.facility.slug}`;
-        referralLink.textContent = `View referral: /r/?f=${response.facility.slug}`;
+        const facilityId = response.facility.id || response.facility.slug;
+        referralLink.href = `/r/?id=${encodeURIComponent(facilityId)}`;
+        referralLink.textContent = `View referral: /r/?id=${facilityId}`;
       } catch (error) {
         statusEl.textContent = error.message;
       }

@@ -9,7 +9,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100">
-  <a href="/" style="position:fixed;top:16px;left:16px;z-index:9999;background:#2563eb;color:white;padding:8px 16px;border-radius:999px;text-decoration:none;font-family:system-ui;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.15)">← Back</a>
+  <a href="/" style="position:fixed;top:16px;left:16px;z-index:9999;background:#2563eb;color:white;padding:8px 16px;border-radius:999px;text-decoration:none;font-family:system-ui;font-weight:600;box-shadow:0 8px 24px rgba(37,99,235,0.35)">← Home</a>
 <div style="height:56px"></div>
   <div class="bg-amber-300 px-6 py-3 text-center text-sm font-black text-slate-950">For Agents $99/mo</div>
   <main class="mx-auto max-w-7xl px-6 py-8">
@@ -32,9 +32,9 @@
 
   <script>
     const demoFacilities = [
-      { facilityName: "Fresno Garden House", slug: "fresno-garden-house", lat: 36.7378, lng: -119.7871, totalBeds: 6, availableBeds: 2, price: 3500, complianceStatus: "PASS" },
-      { facilityName: "Fig Garden Care", slug: "fig-garden-care", lat: 36.8082, lng: -119.8318, totalBeds: 4, availableBeds: 0, price: 4200, complianceStatus: "PASS" },
-      { facilityName: "Central Valley Retreat", slug: "central-valley-retreat", lat: 36.7712, lng: -119.7451, totalBeds: 5, availableBeds: 1, price: 3900, complianceStatus: "PASS" }
+      { id: 1, name: "Fresno Garden House", address: "1234 N Cedar Ave, Fresno, CA 93703", beds_available: 2, care_level: "RCFE", phone: "(559) 555-0101", last_updated: "2026-09-10T00:00:00Z", lat: 36.7378, lng: -119.7871 },
+      { id: 2, name: "Fig Garden Care", address: "4567 W Shaw Ave, Fresno, CA 93711", beds_available: 0, care_level: "RCFE", phone: "(559) 555-0102", last_updated: "2026-09-10T00:00:00Z", lat: 36.8082, lng: -119.8318 },
+      { id: 3, name: "Central Valley Retreat", address: "7890 E Olive Ave, Fresno, CA 93720", beds_available: 1, care_level: "RCFE", phone: "(559) 555-0103", last_updated: "2026-09-10T00:00:00Z", lat: 36.7712, lng: -119.7451 }
     ];
 
     const map = L.map("map").setView([36.7378, -119.7871], 12);
@@ -58,35 +58,25 @@
     `;
     document.head.insertAdjacentHTML("beforeend", markerClass);
 
-    const greenIcon = L.divIcon({
-      html: '<div class="thelo-pin available"></div>',
-      className: "",
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
-    });
+    const greenIcon = L.divIcon({ html: '<div class="thelo-pin available"></div>', className: "", iconSize: [18, 18], iconAnchor: [9, 9] });
+    const grayIcon = L.divIcon({ html: '<div class="thelo-pin full"></div>', className: "", iconSize: [18, 18], iconAnchor: [9, 9] });
 
-    const grayIcon = L.divIcon({
-      html: '<div class="thelo-pin full"></div>',
-      className: "",
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
-    });
+    function normalizeFacilities(items) {
+      return items.map((facility, index) => ({
+        ...facility,
+        lat: facility.lat ?? [36.7378, 36.8082, 36.7712][index] ?? 36.7378,
+        lng: facility.lng ?? [-119.7871, -119.8318, -119.7451][index] ?? -119.7871
+      }));
+    }
 
     async function fetchFacilities() {
       try {
-        const response = await fetch("/api/facilities");
-        if (!response.ok) throw new Error("Relative API unavailable");
+        const response = await fetch("/data/availability.json");
+        if (!response.ok) throw new Error("Availability data unavailable");
         const data = await response.json();
-        return data.facilities || demoFacilities;
+        return normalizeFacilities(Array.isArray(data) ? data : data.facilities || demoFacilities);
       } catch (_) {
-        try {
-          const response = await fetch("https://api.thelo.fyi/api/facilities");
-          if (!response.ok) throw new Error("Hosted API unavailable");
-          const data = await response.json();
-          return data.facilities || demoFacilities;
-        } catch (_) {
-          return demoFacilities;
-        }
+        return demoFacilities;
       }
     }
 
@@ -95,23 +85,25 @@
       list.innerHTML = facilities.map((facility) => `
         <article class="rounded-2xl border border-white/10 bg-slate-950/80 p-4">
           <div class="flex items-center justify-between gap-3">
-            <h2 class="font-semibold text-white">${facility.facilityName}</h2>
-            <span class="rounded-full px-3 py-1 text-xs font-bold ${facility.availableBeds > 0 ? "bg-emerald-400 text-slate-950" : "bg-slate-600 text-white"}">${facility.availableBeds > 0 ? "Available" : "Full"}</span>
+            <h2 class="font-semibold text-white">${facility.name}</h2>
+            <span class="rounded-full px-3 py-1 text-xs font-bold ${facility.beds_available > 0 ? "bg-emerald-400 text-slate-950" : "bg-slate-600 text-white"}">${facility.beds_available > 0 ? "Available" : "Full"}</span>
           </div>
-          <p class="mt-2 text-sm text-slate-300">${facility.availableBeds}/${facility.totalBeds} beds open • $${Number(facility.price || 0).toLocaleString()}/mo</p>
-          <a href="/r/?f=${facility.slug}" class="mt-3 inline-block text-sm font-semibold text-sky-300 underline">View Referral</a>
+          <p class="mt-2 text-sm text-slate-300">${facility.address}</p>
+          <p class="mt-1 text-sm text-slate-300">${facility.beds_available} beds open • ${facility.care_level} • ${facility.phone}</p>
+          <p class="mt-1 text-xs text-slate-500">Updated ${facility.last_updated}</p>
         </article>
       `).join("");
 
       facilities.forEach((facility) => {
         const marker = L.marker([facility.lat, facility.lng], {
-          icon: facility.availableBeds > 0 ? greenIcon : grayIcon
+          icon: facility.beds_available > 0 ? greenIcon : grayIcon
         }).addTo(map);
         marker.bindPopup(`
           <div class="space-y-2">
-            <strong>${facility.facilityName}</strong>
-            <div>${facility.availableBeds}/${facility.totalBeds} beds open</div>
-            <a href="/r/?f=${facility.slug}">View Referral</a>
+            <strong>${facility.name}</strong>
+            <div>${facility.address}</div>
+            <div>${facility.beds_available} beds open • ${facility.care_level}</div>
+            <div>${facility.phone}</div>
           </div>
         `);
       });

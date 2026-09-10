@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "name": "Fresno Garden House",
+    "address": "1234 N Cedar Ave, Fresno, CA 93703",
+    "beds_available": 2,
+    "care_level": "RCFE",
+    "phone": "(559) 555-0101",
+    "last_updated": "2026-09-10T00:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "Fig Garden Care",
+    "address": "4567 W Shaw Ave, Fresno, CA 93711",
+    "beds_available": 0,
+    "care_level": "RCFE",
+    "phone": "(559) 555-0102",
+    "last_updated": "2026-09-10T00:00:00Z"
+  },
+  {
+    "id": 3,
+    "name": "Central Valley Retreat",
+    "address": "7890 E Olive Ave, Fresno, CA 93720",
+    "beds_available": 1,
+    "care_level": "RCFE",
+    "phone": "(559) 555-0103",
+    "last_updated": "2026-09-10T00:00:00Z"
+  }
+]

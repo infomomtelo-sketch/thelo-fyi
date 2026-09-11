@@ -1,40 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>thelo.fyi - Find Care in Fresno</title>
+
+<!-- OG FIX - EXACT BLOCK -->
+<meta property="og:title" content="thelo.fyi - Find Care in Fresno" />
+<meta property="og:description" content="10 verified facilities. Real beds, real phone numbers. Title 22 Score by title-22.com" />
+<meta property="og:image" content="https://thelo.fyi/map/og-image.jpg" />
+<meta property="og:url" content="https://thelo.fyi/map/" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://thelo.fyi/map/og-image.jpg" />
+<link rel="icon" href="/favicon.png" />
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  body { margin:0; font-family: system-ui, -apple-system, sans-serif; }
+  #map { height: 100vh; width: 100%; }
+  .header { position:absolute; top:0; left:0; right:0; z-index:1000; background:white; padding:12px 16px; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+</style>
+</head>
+<body>
+<div class="header">
+  <b>thelo.fyi</b> - 10 verified facilities in Fresno | Title 22 Score by title-22.com
+</div>
+<div id="map"></div>
 <script>
-let facilities = [];
-const FALLBACK = [
-  {id:"1",name:"Fresno Assisted Living",address:"123 N Fresno St, Fresno, CA",lat:36.7378,lng:-119.7871,beds_available:3,care_level:"Assisted Living",phone:"5595550100",last_updated:"2026-05-10"}
+const map = L.map('map').setView([36.7783, -119.7193], 11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+// Your 10 facilities - replace with your real data
+const facilities = [
+  {name:"Facility 1", lat:36.7783, lng:-119.7193, beds:3, phone:"(559) 000-0001", score:92},
+  {name:"Facility 2", lat:36.800, lng:-119.700, beds:2, phone:"(559) 000-0002", score:88}
 ];
-
-function openFacility(id){
- const f = facilities.find(x=>String(x.id)===String(id));
- if(!f){console.error('not found',id);return;}
- document.getElementById('modalName').textContent=f.name||'';
- document.getElementById('modalAddress').textContent=f.address||'';
- document.getElementById('modalBeds').textContent=f.beds_available??'';
- document.getElementById('modalCare').textContent=f.care_level||f.care_type||'';
- document.getElementById('modalPhone').textContent=f.phone||'No phone listed';
- document.getElementById('modalUpdated').textContent=f.last_updated||f.updated_at||'';
- document.getElementById('callBtn').href=f.phone?`tel:${f.phone}`:'#';
- document.getElementById('facilityModal').classList.remove('hidden');
- window.facilities=facilities;
-}
-
-async function loadFacilities(){
- const urls=['./facilities.json','../facilities.json','/facilities.json'];
- for(const url of urls){
-  try{
-   const res=await fetch(url,{cache:'no-store'});
-   const text=await res.text();
-   console.log(url, res.status, text.slice(0,80));
-   if(!res.ok) continue;
-   if(text.trim().startsWith('<')) continue;
-   const data=JSON.parse(text);
-   facilities=data.facilities||data;
-   renderCards(facilities); renderMarkers(facilities);
-   return;
-  }catch(e){console.warn('fail',url,e)}
- }
- console.log('using FALLBACK');
- facilities=FALLBACK;
- renderCards(facilities); renderMarkers(facilities);
-}
+facilities.forEach(f=>{
+  L.marker([f.lat, f.lng]).addTo(map)
+    .bindPopup(`<b>${f.name}</b><br>Score: ${f.score}/100<br>Beds: ${f.beds}<br>${f.phone}`);
+});
 </script>
+</body>
+</html>

@@ -133,6 +133,7 @@
     async function fetchFacilities() {
       let lastError = new Error('No facility source available');
       let sawEmptySource = false;
+      let sawSourceError = false;
       for (const source of FACILITY_SOURCES) {
         try {
           const response = await fetch(source);
@@ -150,10 +151,11 @@
           }
           return items.map(normalizeFacility);
         } catch (error) {
+          sawSourceError = true;
           lastError = error;
         }
       }
-      if (sawEmptySource) return [];
+      if (sawEmptySource && !sawSourceError) return [];
       throw lastError;
     }
 

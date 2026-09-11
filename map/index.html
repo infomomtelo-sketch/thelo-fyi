@@ -108,7 +108,12 @@
     }
 
     fetch('/map/facilities.json')
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to load facilities: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((facilities) => {
         listingSummary.textContent = `${facilities.length} verified facilities with live map pins.`;
 
@@ -148,6 +153,10 @@
           `;
 
           card.addEventListener('click', () => selectFacility(index));
+          const phoneLink = card.querySelector('a[href^="tel:"]');
+          if (phoneLink) {
+            phoneLink.addEventListener('click', (event) => event.stopPropagation());
+          }
           card.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' || event.key === ' ') {
               event.preventDefault();

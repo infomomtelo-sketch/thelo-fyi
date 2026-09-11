@@ -115,8 +115,8 @@
       const bedsAvailable = Number(facility?.beds_available ?? facility?.availableBeds ?? 0);
       const lat = Number(facility?.lat ?? 36.7378);
       const lng = Number(facility?.lng ?? -119.7871);
-      const validLat = Number.isFinite(lat) && lat >= -90 && lat <= 90 ? lat : 36.7378;
-      const validLng = Number.isFinite(lng) && lng >= -180 && lng <= 180 ? lng : -119.7871;
+      const validLat = Number.isFinite(lat) && lat >= -90 && lat <= 90 ? lat : null;
+      const validLng = Number.isFinite(lng) && lng >= -180 && lng <= 180 ? lng : null;
       return {
         id: String(facility?.id ?? facility?.slug ?? `facility-${index + 1}`),
         name: String(facility?.name ?? facility?.facilityName ?? 'Unknown facility'),
@@ -168,13 +168,30 @@
           const safeCareLevel = escapeHtml(facility.care_level);
           const safePhone = escapeHtml(facility.phone);
           const safeBedsLabel = escapeHtml(bedsLabel(facility.beds_available));
-          const marker = L.marker([facility.lat, facility.lng]).addTo(map).bindPopup(
-            `<div style="min-width:220px"><b>${safeName}</b><br>${safeAddress}<br>${safeCareLevel}<br>${safeBedsLabel}</div>`
-          );
+          let marker = null;
+          if (facility.lat !== null && facility.lng !== null) {
+            const popupContent = document.createElement('div');
+            popupContent.style.minWidth = '220px';
 
-          marker.on('click', () => selectFacility(index, false));
+            const nameNode = document.createElement('b');
+            nameNode.textContent = facility.name;
+            const addressNode = document.createElement('div');
+            addressNode.textContent = facility.address;
+            const careNode = document.createElement('div');
+            careNode.textContent = facility.care_level;
+            const bedsNode = document.createElement('div');
+            bedsNode.textContent = bedsLabel(facility.beds_available);
+
+            popupContent.appendChild(nameNode);
+            popupContent.appendChild(addressNode);
+            popupContent.appendChild(careNode);
+            popupContent.appendChild(bedsNode);
+
+            marker = L.marker([facility.lat, facility.lng]).addTo(map).bindPopup(popupContent);
+            marker.on('click', () => selectFacility(index, false));
+            bounds.push([facility.lat, facility.lng]);
+          }
           markers.push(marker);
-          bounds.push([facility.lat, facility.lng]);
 
           const card = document.createElement('article');
           card.className = 'facility-card block w-full cursor-pointer rounded-3xl border border-white/10 bg-white/5 p-5 text-left transition hover:border-sky-400/40 hover:bg-slate-900';

@@ -55,6 +55,47 @@ const DEMO_FACILITIES = [
   }
 ];
 
+// Neighbourhood-level coordinates per ZIP, averaged from the real Fresno
+// facilities in facilities.json. These place a pin in the right part of town;
+// they are not building-accurate and must not be presented as exact. A ZIP that
+// is not listed here yields no pin at all rather than a guessed one - the map
+// already renders such a listing without a marker.
+const ZIP_COORDINATES = {
+  "93705": { lat: 36.7812, lng: -119.8188 },
+  "93706": { lat: 36.7082, lng: -119.7284 },
+  "93711": { lat: 36.8236, lng: -119.8206 },
+  "93720": { lat: 36.8344, lng: -119.7836 },
+  "93722": { lat: 36.7947, lng: -119.8705 },
+  "93727": { lat: 36.7315, lng: -119.7252 },
+  "93730": { lat: 36.8711, lng: -119.7830 }
+};
+
+// Falls back to the city only where we have a figure for it. Fresno's is the
+// centre point this codebase has always used for the map's default view.
+const CITY_COORDINATES = {
+  "fresno": { lat: 36.7378, lng: -119.7871 }
+};
+
+function coordinate(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function placePin(zip, city) {
+  const byZip = ZIP_COORDINATES[String(zip || "").trim()];
+  if (byZip) return byZip;
+  const byCity = CITY_COORDINATES[String(city || "").trim().toLowerCase()];
+  if (byCity) return byCity;
+  return null;
+}
+
+function composeAddress({ street, city, state, zip }) {
+  const line = [street, city].filter(Boolean).join(", ");
+  const region = [state, zip].filter(Boolean).join(" ");
+  return [line, region].filter(Boolean).join(" ").trim();
+}
+
 const ALLOWED_ORIGINS = new Set([
   "https://thelo.fyi",
   "https://www.thelo.fyi"
@@ -120,8 +161,8 @@ function toPublicFacility(facility) {
     care_level: String(facility?.care_level || facility?.careLevel || "RCFE").trim() || "RCFE",
     phone: String(facility?.phone || "").trim(),
     last_updated: lastUpdated,
-    lat: Number(facility?.lat ?? 36.7378),
-    lng: Number(facility?.lng ?? -119.7871),
+    lat: coordinate(facility?.lat),
+    lng: coordinate(facility?.lng),
     total_beds: Number(facility?.totalBeds ?? 0),
     price: Number(facility?.price ?? 0),
     license_number: facility?.license_number ? String(facility.license_number).trim() : null,
@@ -150,9 +191,12 @@ function sanitizeFacility(payload) {
   const totalBeds = Number(payload.totalBeds || 0);
   const availableBeds = Number(payload.availableBeds || 0);
   const price = Number(payload.price || 0);
-  const lat = Number(payload.lat || 36.7378);
-  const lng = Number(payload.lng || -119.7871);
-  const address = String(payload.address || "").trim();
+  const street = String(payload.street || "").trim();
+  const city = String(payload.city || "").trim();
+  const state = String(payload.state || "").trim();
+  const zip = String(payload.zip || "").trim();
+  const address = String(payload.address || "").trim() || composeAddress({ street, city, state, zip });
+  const pin = placePin(zip, city);
   const careLevel = String(payload.care_level || payload.careLevel || "RCFE").trim() || "RCFE";
   const phone = String(payload.phone || "").trim();
   const rooms = Array.isArray(payload.rooms) ? payload.rooms : [];
@@ -180,8 +224,8 @@ function sanitizeFacility(payload) {
   if (!Number.isFinite(price) || price < 0) {
     throw new Error("Monthly rate must be 0 or more.");
   }
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-    throw new Error("The two map numbers must both be filled in.");
+  if (!address) {
+    throw new Error("Please fill in your street address, city and ZIP code.");
   }
   if (!normalizedRooms.length) {
     throw new Error("Add at least one room.");
@@ -197,8 +241,14 @@ function sanitizeFacility(payload) {
     care_level: careLevel,
     phone,
     price,
-    lat,
-    lng,
+    street,
+    city,
+    state,
+    zip,
+    // Null where the ZIP is outside the table: the listing still publishes, it
+    // simply carries no map pin.
+    lat: pin ? pin.lat : null,
+    lng: pin ? pin.lng : null,
     license_number: payload.license_number ? String(payload.license_number).trim() : null,
     license_checked_at: payload.license_checked_at ? String(payload.license_checked_at).trim() : null,
     floorPlan: payload.floorPlan && payload.floorPlan.name ? {

@@ -71,17 +71,27 @@
           </div>
 
           <div class="rounded-3xl border border-white/10 bg-slate-950/70 p-5">
-            <h2 class="text-xl font-bold text-white">Where to put your map pin</h2>
-            <p class="mt-2 text-sm leading-6 text-slate-400">Not sure? Leave these as they are — your pin will sit in central Fresno until you change them. To set it exactly: open Google Maps, right-click your home, then click the two numbers at the top of the menu to copy them.</p>
-            <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <h2 class="text-xl font-bold text-white">Address</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-400">This is what families and placement agents see on your listing. We place your map pin from your ZIP code, so it shows the neighbourhood rather than the exact building.</p>
+            <div class="mt-4 space-y-4">
               <label class="block">
-                <span class="mb-2 block text-sm font-medium text-slate-200">First number</span>
-                <input id="lat" name="lat" type="number" step="0.0001" value="36.7378" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white">
+                <span class="mb-2 block text-sm font-medium text-slate-200">Street address</span>
+                <input id="street" name="street" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white" placeholder="1234 N Cedar Ave">
               </label>
-              <label class="block">
-                <span class="mb-2 block text-sm font-medium text-slate-200">Second number</span>
-                <input id="lng" name="lng" type="number" step="0.0001" value="-119.7871" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white">
-              </label>
+              <div class="grid gap-4 md:grid-cols-3">
+                <label class="block">
+                  <span class="mb-2 block text-sm font-medium text-slate-200">City</span>
+                  <input id="city" name="city" value="Fresno" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white" placeholder="Fresno">
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-sm font-medium text-slate-200">State</span>
+                  <input id="state" name="state" value="CA" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white" placeholder="CA">
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-sm font-medium text-slate-200">ZIP code</span>
+                  <input id="zip" name="zip" inputmode="numeric" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white" placeholder="93720">
+                </label>
+              </div>
             </div>
           </div>
 
@@ -264,8 +274,10 @@
       document.getElementById("totalBeds").value = draft.totalBeds || "";
       document.getElementById("availableBeds").value = draft.availableBeds || "";
       document.getElementById("price").value = draft.price || "";
-      document.getElementById("lat").value = draft.lat || 36.7378;
-      document.getElementById("lng").value = draft.lng || -119.7871;
+      document.getElementById("street").value = draft.street || "";
+      document.getElementById("city").value = draft.city || "Fresno";
+      document.getElementById("state").value = draft.state || "CA";
+      document.getElementById("zip").value = draft.zip || "";
       facilityNameInput.value = draft.facilityName || "";
       slugInput.value = draft.slug || "";
       roomsContainer.innerHTML = "";
@@ -369,14 +381,21 @@
         totalBeds: Number(document.getElementById("totalBeds").value),
         availableBeds: Number(document.getElementById("availableBeds").value),
         price: Number(document.getElementById("price").value),
-        lat: Number(document.getElementById("lat").value),
-        lng: Number(document.getElementById("lng").value),
+        street: document.getElementById("street").value.trim(),
+        city: document.getElementById("city").value.trim(),
+        state: document.getElementById("state").value.trim(),
+        zip: document.getElementById("zip").value.trim(),
         rooms,
         floorPlan: uploadedFile
       };
 
       if (!payload.slug || !payload.facilityName) {
-        statusEl.textContent = "Please fill in your home\u2019s name and its web address.";
+        setStatus("Please fill in your home\u2019s name and its web address.", "error");
+        return;
+      }
+
+      if (!payload.street || !payload.city || !payload.zip) {
+        setStatus("Please fill in your street address, city and ZIP code.", "error");
         return;
       }
 

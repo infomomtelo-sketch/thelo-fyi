@@ -84,11 +84,8 @@ visible label in their words, not ours:
   preview doing the explaining. Never show the word "slug" on screen, in a
   helper line, or in an error message. The `slug` id/param names stay as-is
   in code.
-- **latitude / longitude** → "Where to put your map pin", the two fields
-  labelled "First number" and "Second number", with instructions for copying
-  them out of Google Maps. The defaults (36.7378, -119.7871) are central
-  Fresno; the helper text says so, so do not change the defaults without
-  changing that sentence.
+- **latitude / longitude** → never shown. The operator gives a street address,
+  city, state and ZIP; the server places the pin. See "Map pins" below.
 - **sq ft** → "Room size in square feet" + "Length times width, in feet. A
   rough number is fine."
 - **floor plan upload** → labelled optional, with "Don't have one? Skip this
@@ -123,11 +120,37 @@ than shown a browser error string. Do not replace that message with a raw
 `error.message` — "Load failed" and "Failed to fetch" mean nothing to an
 operator.
 
+## Map pins are derived, never typed
+
+Operators are asked for an address, never for coordinates. `placePin()` in
+`worker.js` resolves them:
+
+1. `ZIP_COORDINATES` — seven Fresno ZIPs, each averaged from the real
+   facilities in `facilities.json`. **Every figure is traceable to a committed
+   address; none are invented.** They are neighbourhood-level, not
+   building-accurate, and `/app/` tells the operator exactly that.
+2. `CITY_COORDINATES` — Fresno only, using the centre point this codebase has
+   always used for the map's default view.
+3. Otherwise **null**. The listing publishes with no pin; `/map/` already
+   renders such a listing in the list with "Map pin unavailable for this
+   listing." Never substitute a guessed coordinate.
+
+`Number(null)` is `0` and `0` passes a naive finite/range check, which would
+drop a pin at 0°,0° in the Atlantic. Both `worker.js` (`coordinate()`) and
+`map/index.html` (`toCoord()`) guard against this. Do not simplify either back
+to a bare `Number()`.
+
+Coverage is thin — seven ZIPs. A home in Clovis or Sanger currently gets no
+pin. Real geocoding at save time is the fix; until then the gap is honest
+rather than papered over.
+
 ## Known gaps
 
 - `privacy/index.html` says collected data includes "license number". Nothing in
   the intake form collects one. Either add the field or amend the sentence.
 - `/create` collects only name, slug, beds, and price; it hands off to `/app/`
   for the rest.
+- Map pin coverage is seven Fresno ZIPs plus the city of Fresno. Everything
+  else lists without a pin.
 - The `/agent/` email capture writes to `localStorage` only. It does not reach
   any server, so no one is actually contacted.

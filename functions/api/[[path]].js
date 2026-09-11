@@ -277,7 +277,18 @@ async function listStoredFacilities(env) {
   return facilities.filter(Boolean);
 }
 
-export default {
+// Cloudflare Pages Function. Serves every /api/* path; Pages continues to serve
+// all other routes as static assets, untouched.
+//
+// Pages Functions call a named handler with a context object, where a Worker
+// module exports { fetch }. onRequest below is that adapter; the request URL is
+// the full original path, so the pathname checks are unchanged from when this
+// file was worker.js at the repo root.
+export async function onRequest(context) {
+  return handleRequest(context.request, context.env);
+}
+
+const api = {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "https://thelo.fyi";
     const url = new URL(request.url);
@@ -330,3 +341,7 @@ export default {
     return json({ error: "Not found." }, 404, origin);
   }
 };
+
+function handleRequest(request, env) {
+  return api.fetch(request, env);
+}

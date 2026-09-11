@@ -142,9 +142,6 @@
           if (!Array.isArray(items)) {
             throw new Error(`Invalid facilities payload from ${source}`);
           }
-          if (items.length === 0) {
-            throw new Error(`No facilities in payload from ${source}`);
-          }
           return items.map(normalizeFacility);
         } catch (error) {
           lastError = error;
@@ -155,6 +152,12 @@
 
     fetchFacilities()
       .then((facilities) => {
+        if (!facilities.length) {
+          listingSummary.textContent = 'No facilities available right now.';
+          facilityList.innerHTML = '<div class="rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-slate-200">Please check back soon for updated Fresno listings.</div>';
+          return;
+        }
+
         listingSummary.textContent = `${facilities.length} verified facilities with live map pins.`;
 
         const bounds = [];
@@ -164,7 +167,6 @@
           const safeAddress = escapeHtml(facility.address);
           const safeCareLevel = escapeHtml(facility.care_level);
           const safePhone = escapeHtml(facility.phone);
-          const safePhoneHref = phoneHref(facility.phone);
           const safeBedsLabel = escapeHtml(bedsLabel(facility.beds_available));
           const marker = L.marker([facility.lat, facility.lng]).addTo(map).bindPopup(
             `<div style="min-width:220px"><b>${safeName}</b><br>${safeAddress}<br>${safeCareLevel}<br>${safeBedsLabel}</div>`
@@ -177,6 +179,7 @@
           const card = document.createElement('article');
           card.className = 'facility-card block w-full cursor-pointer rounded-3xl border border-white/10 bg-white/5 p-5 text-left transition hover:border-sky-400/40 hover:bg-slate-900';
           card.tabIndex = 0;
+          const safePhoneHref = phoneHref(facility.phone);
           card.innerHTML = `
             <div class="flex flex-wrap items-start justify-between gap-3">
               <div>

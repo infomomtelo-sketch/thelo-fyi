@@ -109,15 +109,18 @@
     }
 
     function normalizeFacility(facility, index) {
+      const bedsAvailable = Number(facility?.beds_available ?? facility?.availableBeds ?? 0);
+      const lat = Number(facility?.lat ?? 36.7378);
+      const lng = Number(facility?.lng ?? -119.7871);
       return {
         id: String(facility?.id ?? facility?.slug ?? `facility-${index + 1}`),
         name: String(facility?.name ?? facility?.facilityName ?? 'Unknown facility'),
         address: String(facility?.address ?? 'Address unavailable'),
         care_level: String(facility?.care_level ?? facility?.careLevel ?? 'RCFE'),
-        beds_available: Number(facility?.beds_available ?? facility?.availableBeds ?? 0),
+        beds_available: Number.isFinite(bedsAvailable) ? Math.max(0, bedsAvailable) : 0,
         phone: String(facility?.phone ?? ''),
-        lat: Number(facility?.lat ?? 36.7378),
-        lng: Number(facility?.lng ?? -119.7871)
+        lat: Number.isFinite(lat) ? lat : 36.7378,
+        lng: Number.isFinite(lng) ? lng : -119.7871
       };
     }
 

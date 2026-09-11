@@ -121,10 +121,15 @@
 
     function normalizeFacility(facility, index) {
       const bedsAvailable = Number(facility?.beds_available ?? facility?.availableBeds ?? 0);
-      const lat = Number(facility?.lat);
-      const lng = Number(facility?.lng);
-      const validLat = Number.isFinite(lat) && lat >= -90 && lat <= 90 ? lat : null;
-      const validLng = Number.isFinite(lng) && lng >= -180 && lng <= 180 ? lng : null;
+      // Number(null) is 0, which passes a plain range check and would drop a pin
+      // at 0,0 in the Atlantic. A listing with no coordinates must stay pin-less.
+      const toCoord = (value, limit) => {
+        if (value === null || value === undefined || value === '') return null;
+        const parsed = Number(value);
+        return Number.isFinite(parsed) && parsed >= -limit && parsed <= limit ? parsed : null;
+      };
+      const validLat = toCoord(facility?.lat, 90);
+      const validLng = toCoord(facility?.lng, 180);
       return {
         id: String(facility?.id ?? facility?.slug ?? facility?.facilityName ?? facility?.name ?? `facility-${index + 1}`),
         slug: String(facility?.slug ?? facility?.id ?? ''),

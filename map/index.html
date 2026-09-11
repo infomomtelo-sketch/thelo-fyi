@@ -26,18 +26,16 @@
 </div>
 <div id="map"></div>
 <script>
-const map = L.map('map').setView([36.7783, -119.7193], 11);
+const map = L.map('map').setView([36.77, -119.71], 11);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-// Your 10 facilities - replace with your real data
-const facilities = [
-  {name:"Facility 1", lat:36.7783, lng:-119.7193, beds:3, phone:"(559) 000-0001", score:92},
-  {name:"Facility 2", lat:36.800, lng:-119.700, beds:2, phone:"(559) 000-0002", score:88}
-];
-facilities.forEach(f=>{
-  L.marker([f.lat, f.lng]).addTo(map)
-    .bindPopup(`<b>${f.name}</b><br>Score: ${f.score}/100<br>Beds: ${f.beds}<br>${f.phone}`);
-});
+fetch('/map/facilities.json')
+  .then(r => r.json())
+  .then(facilities => {
+    facilities.forEach(f => {
+      L.marker([f.lat, f.lng]).addTo(map).bindPopup(`<b>${f.name}</b><br>${f.address}`);
+    });
+  });
 </script>
 </body>
 </html>

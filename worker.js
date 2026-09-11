@@ -169,22 +169,22 @@ function sanitizeFacility(payload) {
   });
 
   if (!facilityName || !slug) {
-    throw new Error("Facility name and slug are required.");
+    throw new Error("Please fill in your home's name and its web address.");
   }
   if (!Number.isFinite(totalBeds) || totalBeds < 1) {
     throw new Error("Total beds must be at least 1.");
   }
   if (!Number.isFinite(availableBeds) || availableBeds < 0 || availableBeds > totalBeds) {
-    throw new Error("Available beds must be between 0 and total beds.");
+    throw new Error("Beds open right now cannot be more than your total beds.");
   }
   if (!Number.isFinite(price) || price < 0) {
-    throw new Error("Price must be 0 or greater.");
+    throw new Error("Monthly rate must be 0 or more.");
   }
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-    throw new Error("Latitude and longitude are required.");
+    throw new Error("The two map numbers must both be filled in.");
   }
   if (!normalizedRooms.length) {
-    throw new Error("At least one room is required.");
+    throw new Error("Add at least one room.");
   }
 
   return {

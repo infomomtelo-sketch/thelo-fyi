@@ -74,6 +74,30 @@ is therefore held out of `index.html` until the fields exist and are populated.
   longer exist; changing it requires the owner's say-so.
 - **Nav labels**: List your home · Map · Room planner · Agent access.
 
+## Plain language in operator-facing forms
+
+The people filling in `/create` and `/app/` run care homes; they are not
+web developers. Technical field names made them stall and leave. Keep every
+visible label in their words, not ours:
+
+- **slug** → "Web address for your listing", with a live `thelo.fyi/r/...`
+  preview doing the explaining. Never show the word "slug" on screen, in a
+  helper line, or in an error message. The `slug` id/param names stay as-is
+  in code.
+- **latitude / longitude** → "Where to put your map pin", the two fields
+  labelled "First number" and "Second number", with instructions for copying
+  them out of Google Maps. The defaults (36.7378, -119.7871) are central
+  Fresno; the helper text says so, so do not change the defaults without
+  changing that sentence.
+- **sq ft** → "Room size in square feet" + "Length times width, in feet. A
+  rough number is fine."
+- **floor plan upload** → labelled optional, with "Don't have one? Skip this
+  — you can add it later." This is only true while nothing validates the
+  file: `uploadedFile` defaults to null and no submit guard tests it. If that
+  ever changes, change the copy.
+- Worker validation errors surface verbatim in the operator's status line, so
+  they are written in the same plain language.
+
 ## Known gaps
 
 - `privacy/index.html` says collected data includes "license number". Nothing in

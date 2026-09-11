@@ -81,7 +81,10 @@
     }
 
     function phoneHref(phone) {
-      return `tel:${String(phone ?? '').replace(/[^+\d]/g, '')}`;
+      const raw = String(phone ?? '');
+      const digits = raw.replace(/\D/g, '');
+      const leadingPlus = /^\s*\+/.test(raw) ? '+' : '';
+      return `tel:${leadingPlus}${digits}`;
     }
 
     function bedsLabel(beds) {
@@ -112,6 +115,8 @@
       const bedsAvailable = Number(facility?.beds_available ?? facility?.availableBeds ?? 0);
       const lat = Number(facility?.lat ?? 36.7378);
       const lng = Number(facility?.lng ?? -119.7871);
+      const validLat = Number.isFinite(lat) && lat >= -90 && lat <= 90 ? lat : 36.7378;
+      const validLng = Number.isFinite(lng) && lng >= -180 && lng <= 180 ? lng : -119.7871;
       return {
         id: String(facility?.id ?? facility?.slug ?? `facility-${index + 1}`),
         name: String(facility?.name ?? facility?.facilityName ?? 'Unknown facility'),
@@ -119,8 +124,8 @@
         care_level: String(facility?.care_level ?? facility?.careLevel ?? 'RCFE'),
         beds_available: Number.isFinite(bedsAvailable) ? Math.max(0, bedsAvailable) : 0,
         phone: String(facility?.phone ?? ''),
-        lat: Number.isFinite(lat) ? lat : 36.7378,
-        lng: Number.isFinite(lng) ? lng : -119.7871
+        lat: validLat,
+        lng: validLng
       };
     }
 
@@ -136,6 +141,9 @@
           const items = Array.isArray(payload) ? payload : payload?.facilities;
           if (!Array.isArray(items)) {
             throw new Error(`Invalid facilities payload from ${source}`);
+          }
+          if (items.length === 0) {
+            throw new Error(`No facilities in payload from ${source}`);
           }
           return items.map(normalizeFacility);
         } catch (error) {

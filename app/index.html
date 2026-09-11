@@ -13,7 +13,7 @@
   <meta name="twitter:title" content="thelo.fyi — Fresno care home listings" />
   <meta name="twitter:description" content="Flat-fee listings for licensed Fresno care homes. Operators pay a flat monthly fee, never per resident." />
   <meta name="twitter:image" content="https://thelo.fyi/og-image.jpg" />
-  <title>Thelo Engine</title>
+  <title>Room planner — thelo.fyi</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100">
@@ -22,8 +22,9 @@
   <main class="mx-auto max-w-6xl px-6 py-10">
     <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
       <div>
-        <p class="text-sm uppercase tracking-[0.2em] text-slate-400">Thelo Engine</p>
-        <h1 class="mt-2 text-3xl font-black">Facility floor plan + Title 22 check</h1>
+        <p class="text-sm uppercase tracking-[0.2em] text-slate-400">thelo.fyi</p>
+        <h1 class="mt-2 text-3xl font-black">Room planner</h1>
+        <p class="mt-2 text-sm text-slate-400">Planning tool only. Not a compliance determination.</p>
       </div>
       <a href="/" class="rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-slate-200">Back Home</a>
     </div>
@@ -79,7 +80,7 @@
             <div class="mb-4 flex items-center justify-between gap-4">
               <div>
                 <h2 class="text-xl font-bold text-white">Rooms</h2>
-                <p class="text-sm text-slate-400">Title 22 minimums: 80 sq ft single, 60 sq ft per bed multi.</p>
+                <p class="text-sm text-slate-400">Record room names, bed counts, and floor area for your own planning.</p>
               </div>
               <button type="button" id="addRoom" class="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-sm font-semibold text-emerald-100">Add Room</button>
             </div>
@@ -95,9 +96,9 @@
 
       <aside class="space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6">
         <div class="rounded-2xl bg-slate-950 p-5">
-          <p class="text-sm uppercase tracking-[0.2em] text-slate-400">Compliance</p>
-          <p id="complianceBadge" class="mt-3 inline-flex rounded-full bg-slate-800 px-4 py-2 text-sm font-bold text-slate-200">Waiting for room details</p>
-          <p id="complianceText" class="mt-4 text-sm leading-7 text-slate-300">Enter room sizes and beds to evaluate §87307 floor-area requirements.</p>
+          <p class="text-sm uppercase tracking-[0.2em] text-slate-400">Room summary</p>
+          <p id="roomSummary" class="mt-3 text-sm leading-7 text-slate-300">Add room details to see your totals.</p>
+          <p class="mt-4 text-xs leading-6 text-slate-500">Planning tool only. Not a compliance determination. Compliance is determined solely by CDSS.</p>
         </div>
         <div id="linksCard" class="hidden rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-5">
           <p class="text-sm uppercase tracking-[0.2em] text-emerald-100">Saved</p>
@@ -111,10 +112,10 @@
   </main>
 
   <footer class="border-t border-white/10 px-6 py-8 text-center text-xs text-slate-500">
-    © 2026 thelo.fyi • A product of EC Rental Property Management LLC
-    <span class="mx-2">•</span><a href="/privacy/" class="hover:text-slate-300">Privacy</a>
-    <span class="mx-2">•</span><a href="/terms/" class="hover:text-slate-300">Terms</a>
-    <span class="mx-2">•</span><a href="/disclaimer/" class="hover:text-slate-300">Disclaimer</a>
+    © 2026 thelo.fyi. All rights reserved.
+    <span class="mx-2">·</span><a href="/privacy/" class="hover:text-slate-300">Privacy</a>
+    <span class="mx-2">·</span><a href="/terms/" class="hover:text-slate-300">Terms</a>
+    <span class="mx-2">·</span><a href="/disclaimer/" class="hover:text-slate-300">Disclaimer</a>
   </footer>
 
   <script>
@@ -123,8 +124,7 @@
     const params = new URLSearchParams(window.location.search);
     const roomsContainer = document.getElementById("rooms");
     const statusEl = document.getElementById("status");
-    const complianceBadge = document.getElementById("complianceBadge");
-    const complianceText = document.getElementById("complianceText");
+    const roomSummary = document.getElementById("roomSummary");
     const linksCard = document.getElementById("linksCard");
     const referralLink = document.getElementById("referralLink");
     const facilityNameInput = document.getElementById("facilityName");
@@ -174,15 +174,15 @@
       `;
       wrapper.querySelector(".remove-room").addEventListener("click", () => {
         wrapper.remove();
-        updateCompliance();
+        updateRoomSummary();
       });
-      wrapper.querySelectorAll("input").forEach((input) => input.addEventListener("input", updateCompliance));
+      wrapper.querySelectorAll("input").forEach((input) => input.addEventListener("input", updateRoomSummary));
       return wrapper;
     }
 
     function addRoom(room) {
       roomsContainer.appendChild(roomTemplate(room));
-      updateCompliance();
+      updateRoomSummary();
     }
 
     function getRooms() {
@@ -190,33 +190,24 @@
         const name = room.querySelector(".room-name").value.trim();
         const beds = Number(room.querySelector(".room-beds").value || 0);
         const sqft = Number(room.querySelector(".room-sqft").value || 0);
-        const requiredSqft = beds <= 1 ? 80 : beds * 60;
         return {
           name: name || `Room ${index + 1}`,
           beds,
-          sqft,
-          requiredSqft,
-          status: sqft >= requiredSqft ? "PASS" : "FAIL"
+          sqft
         };
       });
     }
 
-    function updateCompliance() {
+    function updateRoomSummary() {
       const rooms = getRooms();
       if (!rooms.length || rooms.some((room) => !room.sqft || !room.beds)) {
-        complianceBadge.textContent = "Waiting for room details";
-        complianceBadge.className = "mt-3 inline-flex rounded-full bg-slate-800 px-4 py-2 text-sm font-bold text-slate-200";
-        complianceText.textContent = "Enter room sizes and beds to evaluate §87307 floor-area requirements.";
+        roomSummary.textContent = "Add room details to see your totals.";
         return;
       }
 
-      const failures = rooms.filter((room) => room.status === "FAIL");
-      const isPass = failures.length === 0;
-      complianceBadge.textContent = `${isPass ? "PASS" : "FAIL"} §87307`;
-      complianceBadge.className = `mt-3 inline-flex rounded-full px-4 py-2 text-sm font-bold ${isPass ? "bg-emerald-400 text-slate-950" : "bg-rose-400 text-slate-950"}`;
-      complianceText.textContent = isPass
-        ? "Every room meets minimum floor area requirements for declared occupancy."
-        : failures.map((room) => `${room.name}: ${room.sqft} sq ft for ${room.beds} bed(s), needs ${room.requiredSqft} sq ft.`).join(" ");
+      const totalBeds = rooms.reduce((sum, room) => sum + room.beds, 0);
+      const totalSqft = rooms.reduce((sum, room) => sum + room.sqft, 0);
+      roomSummary.textContent = `${rooms.length} room(s) · ${totalBeds} bed(s) · ${totalSqft} sq ft total.`;
     }
 
     async function postFacility(payload) {
@@ -331,7 +322,6 @@
     document.getElementById("facilityForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const rooms = getRooms();
-      const complianceStatus = rooms.every((room) => room.status === "PASS") ? "PASS" : "FAIL";
       const payload = {
         facilityName: facilityNameInput.value.trim(),
         slug: slugify(slugInput.value),
@@ -341,8 +331,7 @@
         lat: Number(document.getElementById("lat").value),
         lng: Number(document.getElementById("lng").value),
         rooms,
-        floorPlan: uploadedFile,
-        complianceStatus
+        floorPlan: uploadedFile
       };
 
       if (!payload.slug || !payload.facilityName) {
@@ -355,7 +344,7 @@
 
       try {
         const response = await postFacility(payload);
-        statusEl.textContent = "Saved locally and synced to Thelo.";
+        statusEl.textContent = "Saved locally and synced to thelo.fyi.";
         linksCard.classList.remove("hidden");
         const facilityId = response.facility.id || response.facility.slug;
         referralLink.href = `/r/?id=${encodeURIComponent(facilityId)}`;
@@ -366,7 +355,7 @@
     });
 
     initialize();
-    updateCompliance();
+    updateRoomSummary();
   </script>
 </body>
 </html>

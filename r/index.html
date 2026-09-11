@@ -13,7 +13,7 @@
   <meta name="twitter:title" content="thelo.fyi — Fresno care home listings" />
   <meta name="twitter:description" content="Flat-fee listings for licensed Fresno care homes. Operators pay a flat monthly fee, never per resident." />
   <meta name="twitter:image" content="https://thelo.fyi/og-image.jpg" />
-  <title>Thelo Referral</title>
+  <title>Facility listing — thelo.fyi</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100">
@@ -23,16 +23,15 @@
     <div class="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-sky-950/40">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p class="text-sm uppercase tracking-[0.2em] text-slate-400">Thelo Verified</p>
+          <p class="text-sm uppercase tracking-[0.2em] text-slate-400">Facility listing</p>
           <h1 id="facilityName" class="mt-3 text-4xl font-black text-white">Loading facility...</h1>
         </div>
-        <span id="verifiedBadge" class="rounded-full bg-emerald-400 px-5 py-3 text-sm font-black text-slate-950">Verified PASS</span>
       </div>
 
       <div class="mt-8 grid gap-8 lg:grid-cols-[1.2fr,0.8fr]">
         <section>
           <div class="flex flex-wrap gap-3">
-            <span class="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-sm font-semibold text-emerald-100">Available Now</span>
+            <span id="availabilityBadge" class="rounded-full border border-white/10 bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-200">Availability unknown</span>
             <span id="bedsBadge" class="rounded-full border border-white/10 bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-200">2 beds</span>
             <span id="careBadge" class="rounded-full border border-white/10 bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-200">RCFE</span>
           </div>
@@ -58,19 +57,19 @@
           <a id="callLink" href="tel:" class="mt-4 inline-flex rounded-full bg-sky-400 px-6 py-3 text-sm font-bold text-slate-950">Call Facility</a>
           <div class="mt-6 space-y-3 text-sm text-slate-300">
             <p id="locationText">Fresno, CA</p>
-            <p id="complianceText">Title 22 status: PASS §87307</p>
+            <p id="licenseText" hidden></p>
           </div>
-          <p class="mt-10 text-xs uppercase tracking-[0.2em] text-slate-500">Powered by Thelo</p>
+          <p class="mt-10 text-xs uppercase tracking-[0.2em] text-slate-500">thelo.fyi</p>
         </aside>
       </div>
     </div>
   </main>
 
   <footer class="border-t border-white/10 px-6 py-8 text-center text-xs text-slate-500">
-    © 2026 thelo.fyi • A product of EC Rental Property Management LLC
-    <span class="mx-2">•</span><a href="/privacy/" class="hover:text-slate-300">Privacy</a>
-    <span class="mx-2">•</span><a href="/terms/" class="hover:text-slate-300">Terms</a>
-    <span class="mx-2">•</span><a href="/disclaimer/" class="hover:text-slate-300">Disclaimer</a>
+    © 2026 thelo.fyi. All rights reserved.
+    <span class="mx-2">·</span><a href="/privacy/" class="hover:text-slate-300">Privacy</a>
+    <span class="mx-2">·</span><a href="/terms/" class="hover:text-slate-300">Terms</a>
+    <span class="mx-2">·</span><a href="/disclaimer/" class="hover:text-slate-300">Disclaimer</a>
   </footer>
 
   <script>
@@ -88,10 +87,9 @@
       price: 3500,
       lat: 36.7378,
       lng: -119.7871,
-      compliance_status: "PASS",
       rooms: [
-        { name: "Primary Suite", beds: 1, sqft: 110, requiredSqft: 80, status: "PASS" },
-        { name: "Garden Room", beds: 1, sqft: 96, requiredSqft: 80, status: "PASS" }
+        { name: "Primary Suite", beds: 1, sqft: 110 },
+        { name: "Garden Room", beds: 1, sqft: 96 }
       ]
     };
 
@@ -102,6 +100,25 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
+    }
+
+    function formatLicenseDate(value) {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date.toLocaleDateString();
+    }
+
+    function renderLicense(facility) {
+      const el = document.getElementById("licenseText");
+      const number = String(facility.license_number || "").trim();
+      const checkedAt = String(facility.license_checked_at || "").trim();
+      const checkedDate = checkedAt ? formatLicenseDate(checkedAt) : null;
+      if (!number || !checkedDate) {
+        el.hidden = true;
+        el.textContent = "";
+        return;
+      }
+      el.textContent = `CDSS #${number} — status checked ${checkedDate}`;
+      el.hidden = false;
     }
 
     function formatUpdated(value) {
@@ -125,7 +142,8 @@
         price: Number(source.price ?? demoFacility.price),
         lat: Number(source.lat ?? demoFacility.lat),
         lng: Number(source.lng ?? demoFacility.lng),
-        compliance_status: source.compliance_status || source.complianceStatus || demoFacility.compliance_status,
+        license_number: source.license_number || null,
+        license_checked_at: source.license_checked_at || null,
         rooms: Array.isArray(source.rooms) && source.rooms.length ? source.rooms : demoFacility.rooms
       };
     }
@@ -174,19 +192,22 @@
       document.getElementById("updatedText").textContent = formatUpdated(facility.last_updated);
       document.getElementById("callLink").href = dialablePhone ? `tel:${dialablePhone}` : "tel:";
       document.getElementById("locationText").textContent = facility.address;
-      document.getElementById("complianceText").textContent = `Title 22 status: ${facility.compliance_status || "PASS"} §87307`;
-      const badge = document.getElementById("verifiedBadge");
-      badge.textContent = `Verified ${facility.compliance_status || "PASS"}`;
-      badge.className = `rounded-full px-5 py-3 text-sm font-black ${facility.compliance_status === "FAIL" ? "bg-rose-400 text-slate-950" : "bg-emerald-400 text-slate-950"}`;
+      renderLicense(facility);
+
+      const beds = Number(facility.beds_available || 0);
+      const availability = document.getElementById("availabilityBadge");
+      availability.textContent = beds > 0 ? `${beds} bed(s) open` : "No beds open";
+      availability.className = beds > 0
+        ? "rounded-full border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-sm font-semibold text-emerald-100"
+        : "rounded-full border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-sm font-semibold text-rose-100";
 
       const rooms = facility.rooms && facility.rooms.length ? facility.rooms : demoFacility.rooms;
       document.getElementById("rooms").innerHTML = rooms.map((room) => `
         <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
           <div class="flex items-center justify-between gap-4">
             <p class="font-semibold text-white">${escapeHtml(room.name)}</p>
-            <span class="rounded-full ${room.status === "FAIL" ? "bg-rose-400" : "bg-emerald-400"} px-3 py-1 text-xs font-bold text-slate-950">${room.status === "FAIL" ? "FAIL" : "PASS"}</span>
           </div>
-          <p class="mt-2 text-sm text-slate-300">${Number(room.sqft || 0)} sq ft • ${Number(room.beds || 0)} bed(s) • needs ${Number(room.requiredSqft || 0)} sq ft</p>
+          <p class="mt-2 text-sm text-slate-300">${Number(room.sqft || 0)} sq ft • ${Number(room.beds || 0)} bed(s)</p>
         </div>
       `).join("");
     }

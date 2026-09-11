@@ -135,8 +135,20 @@
       };
     }
 
+    function extractFacilities(payload) {
+      if (Array.isArray(payload)) return payload;
+      if (Array.isArray(payload?.facilities)) return payload.facilities;
+      return null;
+    }
+
+    function normalizeFacilities(items) {
+      return items.map(normalizeFacility);
+    }
+
     async function fetchFacilities() {
       let lastError = new Error('No facility source available');
+      let sawSuccessfulSource = false;
+      let sawEmptySource = false;
       for (const source of FACILITY_SOURCES) {
         try {
           const response = await fetch(source);
@@ -144,15 +156,21 @@
             throw new Error(`Failed to load ${source}: ${response.status}`);
           }
           const payload = await response.json();
-          const items = Array.isArray(payload) ? payload : payload?.facilities;
-          if (!Array.isArray(items)) {
+          const items = extractFacilities(payload);
+          if (items === null) {
             throw new Error(`Invalid facilities payload from ${source}`);
           }
-          return items.map(normalizeFacility);
+          sawSuccessfulSource = true;
+          if (items.length === 0) {
+            sawEmptySource = true;
+            continue;
+          }
+          return normalizeFacilities(items);
         } catch (error) {
           lastError = error;
         }
       }
+      if (sawSuccessfulSource && sawEmptySource) return [];
       throw lastError;
     }
 

@@ -132,6 +132,7 @@
 
     async function fetchFacilities() {
       let lastError = new Error('No facility source available');
+      let sawEmptySource = false;
       for (const source of FACILITY_SOURCES) {
         try {
           const response = await fetch(source);
@@ -143,11 +144,16 @@
           if (!Array.isArray(items)) {
             throw new Error(`Invalid facilities payload from ${source}`);
           }
+          if (items.length === 0) {
+            sawEmptySource = true;
+            continue;
+          }
           return items.map(normalizeFacility);
         } catch (error) {
           lastError = error;
         }
       }
+      if (sawEmptySource) return [];
       throw lastError;
     }
 

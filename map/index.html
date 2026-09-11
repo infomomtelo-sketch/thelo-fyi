@@ -1,32 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thelo Map</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>thelo.fyi - Find Care in Fresno</title>
+<meta property="og:title" content="thelo.fyi - Find Care in Fresno" />
+<meta property="og:description" content="10 verified facilities. Real beds, real phone numbers. Verified compliance." />
+<meta property="og:image" content="https://thelo.fyi/map/og-image.jpg" />
+<meta property="og:url" content="https://thelo.fyi/map/" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://thelo.fyi/map/og-image.jpg" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; }
+  #map { height: 100%; width: 100%; }
+  .leaflet-container { background: #0f172a; }
+  .facility-card.is-active {
+    border-color: rgb(56 189 248 / 0.75);
+    background: rgb(15 23 42 / 1);
+    box-shadow: 0 0 0 1px rgb(56 189 248 / 0.3);
+  }
+</style>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100">
-  <a href="/" style="position:fixed;top:16px;left:16px;z-index:99999;background:#2563eb;color:white;padding:8px 16px;border-radius:999px;text-decoration:none;font-family:system-ui;font-weight:600;box-shadow:0 8px 24px rgba(37,99,235,0.35)">← Home</a>
-  <div style="height:56px"></div>
-  <div class="bg-amber-300 px-6 py-3 text-center text-sm font-black text-slate-950">For Agents $99/mo</div>
-  <main class="mx-auto max-w-7xl px-6 py-8">
-    <div class="mb-6 flex items-center justify-between gap-4">
-      <div>
-        <p class="text-sm uppercase tracking-[0.2em] text-slate-400">Live availability</p>
-        <h1 class="mt-2 text-3xl font-black text-white">Fresno facility map</h1>
-      </div>
-      <a href="/agent/" class="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200">Get Agent Access</a>
-    </div>
-    <div class="grid gap-6 lg:grid-cols-[320px,1fr]">
-      <aside class="rounded-3xl border border-white/10 bg-white/5 p-4">
-        <div id="facilityList" class="space-y-4"></div>
-      </aside>
-      <section class="overflow-hidden rounded-3xl border border-white/10">
-        <div id="map" class="h-[70vh] w-full" style="pointer-events:auto"></div>
-      </section>
+<header class="border-b border-white/10 bg-slate-950/95">
+  <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">Live Fresno map</p>
+      <h1 class="text-2xl font-black text-white">thelo.fyi care listings</h1>
     </div>
   </main>
 
@@ -40,9 +45,17 @@
   <div id="facilityModal" class="hidden fixed inset-0 z-50 px-4 pb-4 lg:inset-0 lg:flex lg:items-center lg:justify-center" aria-hidden="true">
     <div class="w-full max-w-xl rounded-t-3xl border border-white/10 bg-slate-950 p-5 shadow-2xl lg:rounded-3xl" role="dialog" aria-modal="true">
       <div class="flex items-start justify-between gap-4">
+    <p class="max-w-2xl text-sm text-slate-300">Browse verified facilities, then tap a listing to center the live map on that property.</p>
+  </div>
+</header>
+
+<main class="lg:grid lg:min-h-[calc(100vh-89px)] lg:grid-cols-2">
+  <section class="flex h-[50vh] flex-col border-b border-white/10 lg:h-auto lg:border-b-0 lg:border-r">
+    <div class="border-b border-white/10 px-6 py-5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Facility details</p>
-          <h2 id="modalName" class="mt-1 text-2xl font-black text-white"></h2>
+          <p class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Listings</p>
+          <p id="listing-summary" class="mt-2 text-sm text-slate-300">Loading facilities…</p>
         </div>
         <button id="closeFacilityModal" type="button" class="rounded-full border border-white/10 px-3 py-2 text-sm font-semibold text-slate-200">Close</button>
       </div>
@@ -226,5 +239,105 @@
     }
     fetchFacilities().then(renderFacilities);
   </script>
+        <a href="/create" class="rounded-full border border-sky-400/30 bg-sky-400/10 px-4 py-2 text-xs font-semibold text-sky-100 transition hover:bg-sky-400/20">Add your facility</a>
+      </div>
+    </div>
+    <div id="facility-list" class="flex-1 space-y-4 overflow-y-auto px-6 py-5"></div>
+  </section>
+
+  <section class="h-[50vh] lg:h-auto">
+    <div id="map" class="h-full min-h-[50vh]"></div>
+  </section>
+</main>
+
+<script>
+const map = L.map('map', { zoomControl: true }).setView([36.77, -119.71], 11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+const facilityList = document.getElementById('facility-list');
+const listingSummary = document.getElementById('listing-summary');
+const markers = [];
+const cards = [];
+
+function bedsLabel(beds) {
+  if (beds === 0) return 'Waitlist';
+  if (beds === 1) return '1 bed open';
+  return `${beds} beds open`;
+}
+
+function bedsTone(beds) {
+  if (beds === 0) return 'border-rose-400/30 bg-rose-400/10 text-rose-100';
+  if (beds <= 2) return 'border-amber-300/30 bg-amber-300/10 text-amber-100';
+  return 'border-emerald-400/30 bg-emerald-400/10 text-emerald-100';
+}
+
+function selectFacility(index, openPopup = true) {
+  cards.forEach((card, cardIndex) => {
+    card.classList.toggle('is-active', cardIndex === index);
+  });
+
+  const marker = markers[index];
+  if (!marker) return;
+
+  map.flyTo(marker.getLatLng(), Math.max(map.getZoom(), 13), { duration: 0.6 });
+  if (openPopup) marker.openPopup();
+}
+
+fetch('/map/facilities.json')
+  .then(response => response.json())
+  .then(facilities => {
+    listingSummary.textContent = `${facilities.length} verified facilities with live map pins.`;
+
+    const bounds = [];
+
+    facilities.forEach((facility, index) => {
+      const marker = L.marker([facility.lat, facility.lng]).addTo(map).bindPopup(
+        `<div style="min-width:220px"><b>${facility.name}</b><br>${facility.address}<br>${facility.care_level}<br>${bedsLabel(facility.beds_available)}</div>`
+      );
+
+      marker.on('click', () => selectFacility(index, false));
+      markers.push(marker);
+      bounds.push([facility.lat, facility.lng]);
+
+      const card = document.createElement('article');
+      card.className = 'facility-card block w-full cursor-pointer rounded-3xl border border-white/10 bg-white/5 p-5 text-left transition hover:border-sky-400/40 hover:bg-slate-900';
+      card.tabIndex = 0;
+      card.innerHTML = `
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p class="text-lg font-semibold text-white">${facility.name}</p>
+            <p class="mt-2 text-sm leading-6 text-slate-300">${facility.address}</p>
+          </div>
+          <span class="rounded-full border px-3 py-1 text-xs font-semibold ${bedsTone(facility.beds_available)}">${bedsLabel(facility.beds_available)}</span>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+          <span>${facility.care_level}</span>
+          <span>•</span>
+          <a href="tel:${facility.phone}" class="tracking-normal text-sky-300 hover:text-sky-200">${facility.phone}</a>
+        </div>
+      `;
+      card.addEventListener('click', () => selectFacility(index));
+      card.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          selectFacility(index);
+        }
+      });
+      facilityList.appendChild(card);
+      cards.push(card);
+    });
+
+    if (bounds.length) {
+      map.fitBounds(bounds, { padding: [40, 40] });
+      selectFacility(0, false);
+    }
+  })
+  .catch(() => {
+    listingSummary.textContent = 'Unable to load facilities right now.';
+    facilityList.innerHTML = '<div class="rounded-3xl border border-rose-400/30 bg-rose-400/10 p-5 text-sm text-rose-100">Please refresh to reload the Fresno listings.</div>';
+  });
+</script>
 </body>
 </html>

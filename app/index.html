@@ -22,8 +22,8 @@
       <section class="rounded-3xl border border-white/10 bg-white/5 p-6">
         <div id="dropzone" class="flex min-h-56 cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-sky-400/40 bg-sky-400/5 p-8 text-center transition hover:bg-sky-400/10">
           <input id="floorPlan" type="file" accept="image/*,.pdf" class="hidden">
-          <p class="text-lg font-semibold text-white">Upload floor plan</p>
-          <p class="mt-2 text-sm text-slate-300">Drag and drop an image or PDF here, or click to browse.</p>
+          <p class="text-lg font-semibold text-white">Add floor plan file</p>
+          <p class="mt-2 text-sm text-slate-300">Drag and drop an image or PDF here, or click to browse. This can take a few seconds after you choose a file.</p>
           <p id="fileMeta" class="mt-4 text-xs uppercase tracking-[0.2em] text-slate-400">No file selected</p>
         </div>
 
@@ -34,7 +34,7 @@
               <input id="facilityName" name="facilityName" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none ring-0" placeholder="Fresno Garden House">
             </label>
             <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-200">Slug</span>
+              <span class="mb-2 block text-sm font-medium text-slate-200">Listing link name</span>
               <input id="slug" name="slug" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none ring-0" placeholder="fresno-garden-house">
             </label>
           </div>
@@ -53,14 +53,14 @@
               <input id="price" name="price" type="number" min="0" step="1" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white" placeholder="3500">
             </label>
             <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-200">Latitude</span>
+              <span class="mb-2 block text-sm font-medium text-slate-200">Map latitude</span>
               <input id="lat" name="lat" type="number" step="0.0001" value="36.7378" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white">
             </label>
           </div>
 
           <div class="grid gap-4 md:grid-cols-2">
             <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-200">Longitude</span>
+              <span class="mb-2 block text-sm font-medium text-slate-200">Map longitude</span>
               <input id="lng" name="lng" type="number" step="0.0001" value="-119.7871" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white">
             </label>
           </div>
@@ -69,7 +69,7 @@
             <div class="mb-4 flex items-center justify-between gap-4">
               <div>
                 <h2 class="text-xl font-bold text-white">Rooms</h2>
-                <p class="text-sm text-slate-400">Title 22 minimums: 80 sq ft single, 60 sq ft per bed multi.</p>
+                <p class="text-sm text-slate-400">Title 22 minimums: 80 square feet single, 60 square feet per bed multi.</p>
               </div>
               <button type="button" id="addRoom" class="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-sm font-semibold text-emerald-100">Add Room</button>
             </div>
@@ -93,6 +93,8 @@
           <p class="text-sm uppercase tracking-[0.2em] text-emerald-100">Saved</p>
           <div class="mt-4 space-y-3 text-sm">
             <a id="referralLink" class="block font-semibold text-white underline" href="#"></a>
+            <a id="facebookShareLink" class="block font-semibold text-white underline" href="#" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
+            <a href="https://www.facebook.com/profile.php?id=61593807941065&mibextid=wwXIfr" class="block font-semibold text-white underline" target="_blank" rel="noopener noreferrer">Open your Facebook page</a>
             <a href="/map" class="block font-semibold text-white underline">Open the live map</a>
           </div>
         </div>
@@ -117,11 +119,13 @@
     const complianceText = document.getElementById("complianceText");
     const linksCard = document.getElementById("linksCard");
     const referralLink = document.getElementById("referralLink");
+    const facebookShareLink = document.getElementById("facebookShareLink");
     const facilityNameInput = document.getElementById("facilityName");
     const slugInput = document.getElementById("slug");
     const fileInput = document.getElementById("floorPlan");
     const fileMeta = document.getElementById("fileMeta");
     const dropzone = document.getElementById("dropzone");
+    const FACEBOOK_PAGE_URL = "https://www.facebook.com/profile.php?id=61593807941065&mibextid=wwXIfr";
     let uploadedFile = null;
 
     function handleFile(file) {
@@ -156,7 +160,7 @@
             <input type="number" min="1" value="${room.beds || 1}" class="room-beds w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white">
           </label>
           <label class="block">
-            <span class="mb-2 block text-sm font-medium text-slate-200">Sq ft</span>
+            <span class="mb-2 block text-sm font-medium text-slate-200">Square feet</span>
             <input type="number" min="1" value="${room.sqft || ""}" class="room-sqft w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white" placeholder="120">
           </label>
         </div>
@@ -206,7 +210,7 @@
       complianceBadge.className = `mt-3 inline-flex rounded-full px-4 py-2 text-sm font-bold ${isPass ? "bg-emerald-400 text-slate-950" : "bg-rose-400 text-slate-950"}`;
       complianceText.textContent = isPass
         ? "Every room meets minimum floor area requirements for declared occupancy."
-        : failures.map((room) => `${room.name}: ${room.sqft} sq ft for ${room.beds} bed(s), needs ${room.requiredSqft} sq ft.`).join(" ");
+        : failures.map((room) => `${room.name}: ${room.sqft} square feet for ${room.beds} bed(s), needs ${room.requiredSqft} square feet.`).join(" ");
     }
 
     async function postFacility(payload) {
@@ -228,6 +232,13 @@
         }
       }
       throw lastError;
+    }
+
+    function getFacebookShareUrl(referralUrl) {
+      const shareUrl = new URL("https://www.facebook.com/sharer/sharer.php");
+      shareUrl.searchParams.set("u", referralUrl);
+      shareUrl.searchParams.set("quote", `Post this referral to your page: ${FACEBOOK_PAGE_URL}`);
+      return shareUrl.toString();
     }
 
     function applyDraft(draft) {
@@ -348,8 +359,16 @@
         statusEl.textContent = "Saved locally and synced to Thelo.";
         linksCard.classList.remove("hidden");
         const facilityId = response.facility.id || response.facility.slug;
-        referralLink.href = `/r/?id=${encodeURIComponent(facilityId)}`;
-        referralLink.textContent = `View referral: /r/?id=${facilityId}`;
+        const referralPath = `/r/?id=${encodeURIComponent(facilityId)}`;
+        const referralUrl = new URL(referralPath, window.location.origin).toString();
+        const facebookShareUrl = getFacebookShareUrl(referralUrl);
+        referralLink.href = referralPath;
+        referralLink.textContent = `Open referral link: ${referralPath}`;
+        facebookShareLink.href = facebookShareUrl;
+        const shareWindow = window.open(facebookShareUrl, "_blank", "noopener,noreferrer");
+        if (!shareWindow) {
+          statusEl.textContent = "Saved locally and synced to Thelo. Pop-up blocked: use the Share on Facebook link below.";
+        }
       } catch (error) {
         statusEl.textContent = error.message;
       }

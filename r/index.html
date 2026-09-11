@@ -176,7 +176,7 @@
             <p class="font-semibold text-white">${escapeHtml(room.name)}</p>
             <span class="rounded-full ${room.status === "FAIL" ? "bg-rose-400" : "bg-emerald-400"} px-3 py-1 text-xs font-bold text-slate-950">${room.status === "FAIL" ? "FAIL" : "PASS"}</span>
           </div>
-          <p class="mt-2 text-sm text-slate-300">${Number(room.sqft || 0)} sq ft • ${Number(room.beds || 0)} bed(s) • needs ${Number(room.requiredSqft || 0)} sq ft</p>
+          <p class="mt-2 text-sm text-slate-300">${Number(room.sqft || 0)} square feet • ${Number(room.beds || 0)} bed(s) • needs ${Number(room.requiredSqft || 0)} square feet</p>
         </div>
       `).join("");
     }

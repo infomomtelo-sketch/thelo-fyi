@@ -82,10 +82,13 @@
 
     function phoneHref(phone) {
       const raw = String(phone ?? '');
+      const extensionMatch = raw.match(/(?:ext\.?|x)\s*(\d+)/i);
+      const extension = extensionMatch ? extensionMatch[1] : '';
       const digits = raw.replace(/\D/g, '');
       if (!digits) return '';
       const leadingPlus = /^\s*\+/.test(raw) ? '+' : '';
-      return `tel:${leadingPlus}${digits}`;
+      const extSuffix = extension ? `;ext=${extension}` : '';
+      return `tel:${leadingPlus}${digits}${extSuffix}`;
     }
 
     function bedsLabel(beds) {
@@ -119,7 +122,7 @@
       const validLat = Number.isFinite(lat) && lat >= -90 && lat <= 90 ? lat : null;
       const validLng = Number.isFinite(lng) && lng >= -180 && lng <= 180 ? lng : null;
       return {
-        id: String(facility?.id ?? facility?.slug ?? `facility-${index + 1}`),
+        id: String(facility?.id ?? facility?.slug ?? facility?.facilityName ?? facility?.name ?? `facility-${index + 1}`),
         slug: String(facility?.slug ?? facility?.id ?? ''),
         name: String(facility?.name ?? facility?.facilityName ?? 'Unknown facility'),
         address: String(facility?.address ?? 'Address unavailable'),

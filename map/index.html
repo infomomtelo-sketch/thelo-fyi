@@ -82,9 +82,11 @@
 
     function phoneHref(phone) {
       const raw = String(phone ?? '');
-      const extensionMatch = raw.match(/(?:ext\.?|x)\s*(\d+)/i);
+      const extensionRegex = /(?:ext\.?|x)\s*(\d+)/i;
+      const extensionMatch = raw.match(extensionRegex);
       const extension = extensionMatch ? extensionMatch[1] : '';
-      const digits = raw.replace(/\D/g, '');
+      const mainNumber = extensionMatch ? raw.replace(extensionRegex, '') : raw;
+      const digits = mainNumber.replace(/\D/g, '');
       if (!digits) return '';
       const leadingPlus = /^\s*\+/.test(raw) ? '+' : '';
       const extSuffix = extension ? `;ext=${extension}` : '';
@@ -212,7 +214,10 @@
           const card = document.createElement('article');
           const isMappable = marker !== null;
           card.className = `facility-card block w-full rounded-3xl border border-white/10 bg-white/5 p-5 text-left transition ${isMappable ? 'cursor-pointer hover:border-sky-400/40 hover:bg-slate-900' : 'opacity-80'}`;
-          card.tabIndex = 0;
+          card.tabIndex = isMappable ? 0 : -1;
+          if (!isMappable) {
+            card.setAttribute('aria-disabled', 'true');
+          }
           const safePhoneHref = phoneHref(facility.phone);
           const safePhoneHrefAttr = escapeHtml(safePhoneHref);
           const mapNoteMarkup = isMappable

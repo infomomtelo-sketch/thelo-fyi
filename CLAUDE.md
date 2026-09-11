@@ -98,6 +98,31 @@ visible label in their words, not ours:
 - Worker validation errors surface verbatim in the operator's status line, so
   they are written in the same plain language.
 
+## Deployment — the API is not routed (open issue)
+
+Saving from `/app/` fails on the live site with Safari's "Load failed". The
+repo has **no `wrangler.toml`, no `functions/` directory, no `_worker.js`, and
+no `_routes.json`**, and `CNAME` points at a Cloudflare Pages deploy. A
+`worker.js` at the repo root is not executed by Pages — it is served as a
+static file. So `/api/*` on thelo.fyi hits the static 404, and
+`https://api.thelo.fyi` (the second fallback in `API_BASES`) appears to have no
+host behind it.
+
+To make saving work, one of:
+
+- move `worker.js` to `functions/api/[[path]].js` as a Pages Function, or
+- deploy it as a standalone Worker with a route on `thelo.fyi/api/*`, or
+- point `api.thelo.fyi` at that Worker and keep the existing fallback.
+
+Whichever is chosen, the KV binding must be named `FACILITIES`, and
+`ALLOWED_ORIGINS` in `worker.js` must include the origin the browser sends.
+
+Until then `/app/` degrades honestly: the draft is kept in `localStorage`
+before the network call, and the operator is told their details are safe rather
+than shown a browser error string. Do not replace that message with a raw
+`error.message` — "Load failed" and "Failed to fetch" mean nothing to an
+operator.
+
 ## Known gaps
 
 - `privacy/index.html` says collected data includes "license number". Nothing in

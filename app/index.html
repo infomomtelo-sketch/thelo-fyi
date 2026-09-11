@@ -17,8 +17,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100">
-  <a href="/" style="position:fixed;top:16px;left:16px;z-index:9999;background:#2563eb;color:white;padding:8px 16px;border-radius:999px;text-decoration:none;font-family:system-ui;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.15)">← Back</a>
-<div style="height:56px"></div>
+  <div class="px-6 pt-4">
+    <a href="/" class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500">← Back</a>
+  </div>
   <main class="mx-auto max-w-6xl px-6 py-10">
     <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
       <div>
@@ -26,7 +27,6 @@
         <h1 class="mt-2 text-3xl font-black">Room planner</h1>
         <p class="mt-2 text-sm text-slate-400">Planning tool only. Not a compliance determination.</p>
       </div>
-      <a href="/" class="rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-slate-200">Back Home</a>
     </div>
 
     <div class="grid gap-8 lg:grid-cols-[1.4fr,0.8fr]">
@@ -96,9 +96,9 @@
             <div id="rooms" class="space-y-4"></div>
           </div>
 
-          <div class="flex flex-wrap items-center gap-4">
-            <button type="submit" class="rounded-full bg-emerald-400 px-8 py-4 text-sm font-bold text-slate-950">Save my listing</button>
-            <p id="status" class="text-sm text-slate-300"></p>
+          <div class="space-y-4">
+            <button type="submit" class="w-full rounded-full bg-emerald-400 px-8 py-4 text-sm font-bold text-slate-950 sm:w-auto">Save my listing</button>
+            <p id="status" class="text-sm leading-6 text-slate-300" role="status" aria-live="polite"></p>
           </div>
         </form>
       </section>
@@ -142,6 +142,16 @@
     const fileMeta = document.getElementById("fileMeta");
     const dropzone = document.getElementById("dropzone");
     let uploadedFile = null;
+
+    function setStatus(message, tone) {
+      const tones = {
+        working: "text-sm leading-6 text-slate-300",
+        ok: "text-sm font-semibold leading-6 text-emerald-300",
+        error: "text-sm font-semibold leading-6 text-rose-300"
+      };
+      statusEl.textContent = message;
+      statusEl.className = tones[tone] || tones.working;
+    }
 
     function handleFile(file) {
       if (!file) return;
@@ -221,7 +231,11 @@
     }
 
     async function postFacility(payload) {
-      let lastError = new Error("Unable to save facility");
+      // Keep a message the API itself returned: it explains what to fix, whereas a
+      // network error only says the request never landed. Without this the last
+      // endpoint tried overwrites the useful message from the first.
+      let serverMessage = null;
+
       for (const base of API_BASES) {
         try {
           const response = await fetch(`${base}/facility`, {
@@ -231,14 +245,19 @@
           });
           if (!response.ok) {
             const data = await response.json().catch(() => ({}));
-            throw new Error(data.error || "Save failed");
+            if (data.error) serverMessage = data.error;
+            console.error(`thelo.fyi: ${base}/facility responded ${response.status}`);
+            continue;
           }
           return response.json();
         } catch (error) {
-          lastError = error;
+          console.error(`thelo.fyi: ${base}/facility could not be reached`, error);
         }
       }
-      throw lastError;
+
+      const failure = new Error(serverMessage || "unreachable");
+      failure.unreachable = !serverMessage;
+      throw failure;
     }
 
     function applyDraft(draft) {
@@ -261,12 +280,17 @@
     }
 
     function initialize() {
-      const draft = localStorage.getItem(STORAGE_KEY);
+      let draft = null;
+      try {
+        draft = localStorage.getItem(STORAGE_KEY);
+      } catch (_) {
+        draft = null;
+      }
       if (draft) {
         try {
           applyDraft(JSON.parse(draft));
         } catch (_) {
-          localStorage.removeItem(STORAGE_KEY);
+          try { localStorage.removeItem(STORAGE_KEY); } catch (_ignored) {}
         }
       }
 
@@ -356,18 +380,30 @@
         return;
       }
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      statusEl.textContent = "Saving...";
+      let draftKept = true;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (_) {
+        draftKept = false;
+      }
+
+      setStatus("Saving your listing…", "working");
 
       try {
         const response = await postFacility(payload);
-        statusEl.textContent = "Saved. Your listing page is ready \u2014 see the link on the right.";
+        setStatus("Saved. Your listing page is ready \u2014 the link is just below.", "ok");
         linksCard.classList.remove("hidden");
         const facilityId = response.facility.id || response.facility.slug;
         referralLink.href = `/r/?id=${encodeURIComponent(facilityId)}`;
         referralLink.textContent = "View your listing page";
       } catch (error) {
-        statusEl.textContent = error.message;
+        if (error.unreachable) {
+          setStatus(draftKept
+            ? "We could not publish your listing just now. Your details are still here on this device \u2014 check your connection and tap Save again."
+            : "We could not publish your listing just now. Please check your connection and tap Save again.", "error");
+        } else {
+          setStatus(error.message, "error");
+        }
       }
     });
 

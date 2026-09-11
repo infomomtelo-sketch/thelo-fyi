@@ -210,10 +210,14 @@
           markers.push(marker);
 
           const card = document.createElement('article');
-          card.className = 'facility-card block w-full cursor-pointer rounded-3xl border border-white/10 bg-white/5 p-5 text-left transition hover:border-sky-400/40 hover:bg-slate-900';
+          const isMappable = marker !== null;
+          card.className = `facility-card block w-full rounded-3xl border border-white/10 bg-white/5 p-5 text-left transition ${isMappable ? 'cursor-pointer hover:border-sky-400/40 hover:bg-slate-900' : 'opacity-80'}`;
           card.tabIndex = 0;
           const safePhoneHref = phoneHref(facility.phone);
           const safePhoneHrefAttr = escapeHtml(safePhoneHref);
+          const mapNoteMarkup = isMappable
+            ? ''
+            : '<p class="mt-2 text-xs text-slate-500">Map pin unavailable for this listing.</p>';
           const phoneMarkup = safePhoneHref
             ? `<a href="${safePhoneHrefAttr}" class="tracking-normal text-sky-300 hover:text-sky-200">${safePhone}</a>`
             : `<span class="tracking-normal text-slate-400">${safePhone || 'Phone unavailable'}</span>`;
@@ -230,19 +234,24 @@
               <span class="uppercase tracking-[0.2em]">•</span>
               ${phoneMarkup}
             </div>
+            ${mapNoteMarkup}
           `;
 
-          card.addEventListener('click', () => selectFacility(index));
+          if (isMappable) {
+            card.addEventListener('click', () => selectFacility(index));
+          }
           const phoneLink = card.querySelector('a[href^="tel:"]');
           if (phoneLink) {
             phoneLink.addEventListener('click', (event) => event.stopPropagation());
           }
-          card.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              selectFacility(index);
-            }
-          });
+          if (isMappable) {
+            card.addEventListener('keydown', (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                selectFacility(index);
+              }
+            });
+          }
 
           facilityList.appendChild(card);
           cards.push(card);

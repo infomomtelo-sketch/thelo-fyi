@@ -69,6 +69,7 @@
     const listingSummary = document.getElementById('listing-summary');
     const markers = [];
     const cards = [];
+    const FACILITY_SOURCES = ['/api/facilities', '/map/facilities.json', '/data/availability.json'];
 
     function escapeHtml(value) {
       return String(value ?? '')
@@ -107,13 +108,41 @@
       if (openPopup) marker.openPopup();
     }
 
-    fetch('/map/facilities.json')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to load facilities: ${response.status}`);
+    function normalizeFacility(facility, index) {
+      return {
+        id: String(facility?.id ?? facility?.slug ?? `facility-${index + 1}`),
+        name: String(facility?.name ?? facility?.facilityName ?? 'Unknown facility'),
+        address: String(facility?.address ?? 'Address unavailable'),
+        care_level: String(facility?.care_level ?? facility?.careLevel ?? 'RCFE'),
+        beds_available: Number(facility?.beds_available ?? facility?.availableBeds ?? 0),
+        phone: String(facility?.phone ?? ''),
+        lat: Number(facility?.lat ?? 36.7378),
+        lng: Number(facility?.lng ?? -119.7871)
+      };
+    }
+
+    async function fetchFacilities() {
+      let lastError = new Error('No facility source available');
+      for (const source of FACILITY_SOURCES) {
+        try {
+          const response = await fetch(source);
+          if (!response.ok) {
+            throw new Error(`Failed to load ${source}: ${response.status}`);
+          }
+          const payload = await response.json();
+          const items = Array.isArray(payload) ? payload : payload?.facilities;
+          if (!Array.isArray(items)) {
+            throw new Error(`Invalid facilities payload from ${source}`);
+          }
+          return items.map(normalizeFacility);
+        } catch (error) {
+          lastError = error;
         }
-        return response.json();
-      })
+      }
+      throw lastError;
+    }
+
+    fetchFacilities()
       .then((facilities) => {
         listingSummary.textContent = `${facilities.length} verified facilities with live map pins.`;
 

@@ -11,11 +11,10 @@ const DEMO_FACILITIES = [
     price: 3500,
     lat: 36.7378,
     lng: -119.7871,
-    complianceStatus: "PASS",
     last_updated: "2026-09-10T00:00:00Z",
     rooms: [
-      { name: "Room A", beds: 1, sqft: 110, requiredSqft: 80, status: "PASS" },
-      { name: "Room B", beds: 2, sqft: 140, requiredSqft: 120, status: "PASS" }
+      { name: "Room A", beds: 1, sqft: 110 },
+      { name: "Room B", beds: 2, sqft: 140 }
     ]
   },
   {
@@ -30,11 +29,10 @@ const DEMO_FACILITIES = [
     price: 4200,
     lat: 36.8082,
     lng: -119.8318,
-    complianceStatus: "PASS",
     last_updated: "2026-09-10T00:00:00Z",
     rooms: [
-      { name: "Front Suite", beds: 1, sqft: 104, requiredSqft: 80, status: "PASS" },
-      { name: "Shared Wing", beds: 2, sqft: 150, requiredSqft: 120, status: "PASS" }
+      { name: "Front Suite", beds: 1, sqft: 104 },
+      { name: "Shared Wing", beds: 2, sqft: 150 }
     ]
   },
   {
@@ -49,11 +47,10 @@ const DEMO_FACILITIES = [
     price: 3900,
     lat: 36.7712,
     lng: -119.7451,
-    complianceStatus: "PASS",
     last_updated: "2026-09-10T00:00:00Z",
     rooms: [
-      { name: "Sunrise", beds: 1, sqft: 90, requiredSqft: 80, status: "PASS" },
-      { name: "Orchard", beds: 2, sqft: 132, requiredSqft: 120, status: "PASS" }
+      { name: "Sunrise", beds: 1, sqft: 90 },
+      { name: "Orchard", beds: 2, sqft: 132 }
     ]
   }
 ];
@@ -127,7 +124,8 @@ function toPublicFacility(facility) {
     lng: Number(facility?.lng ?? -119.7871),
     total_beds: Number(facility?.totalBeds ?? 0),
     price: Number(facility?.price ?? 0),
-    compliance_status: facility?.complianceStatus || "PASS",
+    license_number: facility?.license_number ? String(facility.license_number).trim() : null,
+    license_checked_at: facility?.license_checked_at ? String(facility.license_checked_at).trim() : null,
     rooms: Array.isArray(facility?.rooms) ? facility.rooms : []
   };
 }
@@ -163,33 +161,30 @@ function sanitizeFacility(payload) {
   const normalizedRooms = rooms.map((room, index) => {
     const beds = Math.max(1, Number(room.beds || 1));
     const sqft = Math.max(0, Number(room.sqft || 0));
-    const requiredSqft = beds <= 1 ? 80 : beds * 60;
     return {
       name: String(room.name || `Room ${index + 1}`).trim(),
       beds,
-      sqft,
-      requiredSqft,
-      status: sqft >= requiredSqft ? "PASS" : "FAIL"
+      sqft
     };
   });
 
   if (!facilityName || !slug) {
-    throw new Error("Facility name and slug are required.");
+    throw new Error("Please fill in your home's name and its web address.");
   }
   if (!Number.isFinite(totalBeds) || totalBeds < 1) {
     throw new Error("Total beds must be at least 1.");
   }
   if (!Number.isFinite(availableBeds) || availableBeds < 0 || availableBeds > totalBeds) {
-    throw new Error("Available beds must be between 0 and total beds.");
+    throw new Error("Beds open right now cannot be more than your total beds.");
   }
   if (!Number.isFinite(price) || price < 0) {
-    throw new Error("Price must be 0 or greater.");
+    throw new Error("Monthly rate must be 0 or more.");
   }
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-    throw new Error("Latitude and longitude are required.");
+    throw new Error("The two map numbers must both be filled in.");
   }
   if (!normalizedRooms.length) {
-    throw new Error("At least one room is required.");
+    throw new Error("Add at least one room.");
   }
 
   return {
@@ -204,7 +199,8 @@ function sanitizeFacility(payload) {
     price,
     lat,
     lng,
-    complianceStatus: normalizedRooms.every((room) => room.status === "PASS") ? "PASS" : "FAIL",
+    license_number: payload.license_number ? String(payload.license_number).trim() : null,
+    license_checked_at: payload.license_checked_at ? String(payload.license_checked_at).trim() : null,
     floorPlan: payload.floorPlan && payload.floorPlan.name ? {
       name: String(payload.floorPlan.name),
       size: Number(payload.floorPlan.size || 0),

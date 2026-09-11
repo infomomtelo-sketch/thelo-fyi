@@ -4,12 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>thelo.fyi - Find Care in Fresno</title>
-  <meta property="og:title" content="thelo.fyi - Find Care in Fresno" />
-  <meta property="og:description" content="10 verified facilities. Real beds, real phone numbers. Verified compliance." />
+  <meta property="og:title" content="thelo.fyi — Fresno care home listings" />
+  <meta property="og:description" content="Flat-fee listings for licensed Fresno care homes. Operators pay a flat monthly fee, never per resident." />
   <meta property="og:image" content="https://thelo.fyi/map/og-image.jpg" />
   <meta property="og:url" content="https://thelo.fyi/map/" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="thelo.fyi — Fresno care home listings" />
+  <meta name="twitter:description" content="Flat-fee listings for licensed Fresno care homes. Operators pay a flat monthly fee, never per resident." />
   <meta name="twitter:image" content="https://thelo.fyi/map/og-image.jpg" />
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -32,7 +34,7 @@
       <div>
         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">Live Fresno map</p>
         <h1 class="text-2xl font-black text-white">thelo.fyi care listings</h1>
-        <p class="mt-2 max-w-2xl text-sm text-slate-300">Browse verified facilities, then tap a listing to center the live map on that property.</p>
+        <p class="mt-2 max-w-2xl text-sm text-slate-300">Browse listings, then tap one to center the live map on that property.</p>
       </div>
       <a href="/create" class="rounded-full border border-sky-400/30 bg-sky-400/10 px-4 py-2 text-xs font-semibold text-sky-100 transition hover:bg-sky-400/20">Add your facility</a>
     </div>
@@ -53,10 +55,10 @@
   </main>
 
   <footer class="border-t border-white/10 px-6 py-8 text-center text-xs text-slate-500">
-    © 2026 thelo.fyi • A product of EC Rental Property Management LLC
-    <span class="mx-2">•</span><a href="/privacy/" class="hover:text-slate-300">Privacy</a>
-    <span class="mx-2">•</span><a href="/terms/" class="hover:text-slate-300">Terms</a>
-    <span class="mx-2">•</span><a href="/disclaimer/" class="hover:text-slate-300">Disclaimer</a>
+    © 2026 thelo.fyi. All rights reserved.
+    <span class="mx-2">·</span><a href="/privacy/" class="hover:text-slate-300">Privacy</a>
+    <span class="mx-2">·</span><a href="/terms/" class="hover:text-slate-300">Terms</a>
+    <span class="mx-2">·</span><a href="/disclaimer/" class="hover:text-slate-300">Disclaimer</a>
   </footer>
 
   <script>
@@ -176,7 +178,7 @@
           return;
         }
 
-        listingSummary.textContent = `${facilities.length} verified facilities with live map pins.`;
+        listingSummary.textContent = `${facilities.length} facilities with live map pins.`;
 
         const bounds = [];
 

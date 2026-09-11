@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Referral</title>
+  <meta name="description" content="Flat-fee listings for licensed Fresno care homes. Operators pay a flat monthly fee, never per resident." />
+  <meta property="og:title" content="thelo.fyi — Fresno care home listings" />
+  <meta property="og:description" content="Flat-fee listings for licensed Fresno care homes. Operators pay a flat monthly fee, never per resident." />
+  <meta property="og:image" content="https://thelo.fyi/og-image.jpg" />
+  <meta property="og:url" content="https://thelo.fyi/create/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="thelo.fyi — Fresno care home listings" />
+  <meta name="twitter:description" content="Flat-fee listings for licensed Fresno care homes. Operators pay a flat monthly fee, never per resident." />
+  <meta name="twitter:image" content="https://thelo.fyi/og-image.jpg" />
+  <title>List your home — thelo.fyi</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100">
@@ -11,38 +21,42 @@
 <div style="height:56px"></div>
   <main class="mx-auto flex min-h-screen max-w-3xl items-center px-6 py-12">
     <section class="w-full rounded-[2rem] border border-white/10 bg-white/5 p-8">
-      <p class="text-sm uppercase tracking-[0.2em] text-slate-400">Create referral page</p>
-      <h1 class="mt-3 text-4xl font-black text-white">Start your Thelo listing</h1>
+      <p class="text-sm uppercase tracking-[0.2em] text-slate-400">List your home</p>
+      <h1 class="mt-3 text-4xl font-black text-white">List your home</h1>
+      <p class="mt-4 text-sm leading-7 text-slate-300">Four questions to start. Nothing here is permanent — you can change any of it later.</p>
       <form id="createForm" class="mt-8 space-y-5">
         <label class="block">
-          <span class="mb-2 block text-sm font-medium text-slate-200">Facility name</span>
+          <span class="mb-2 block text-sm font-medium text-slate-200">Name of your home</span>
           <input id="name" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white" placeholder="Fresno Garden House">
         </label>
         <label class="block">
-          <span class="mb-2 block text-sm font-medium text-slate-200">Slug preview</span>
+          <span class="mb-2 block text-sm font-medium text-slate-200">Web address for your listing</span>
           <input id="slug" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white" placeholder="fresno-garden-house">
-          <p class="mt-2 text-sm text-slate-400">Preview: <span id="preview">thelo.fyi/r/fresno-garden-house</span></p>
+          <p class="mt-2 text-sm text-slate-400">We fill this in from your home's name. Change it only if you want a different link.</p>
+          <p class="mt-2 text-sm text-slate-300">Your page will be: <span id="preview" class="font-semibold text-white">thelo.fyi/r/fresno-garden-house</span></p>
         </label>
         <div class="grid gap-4 md:grid-cols-2">
           <label class="block">
-            <span class="mb-2 block text-sm font-medium text-slate-200">Beds</span>
+            <span class="mb-2 block text-sm font-medium text-slate-200">How many beds total?</span>
             <input id="beds" type="number" min="1" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white" placeholder="6">
+            <p class="mt-2 text-sm text-slate-400">Licensed capacity, not how many are open right now.</p>
           </label>
           <label class="block">
-            <span class="mb-2 block text-sm font-medium text-slate-200">Price</span>
+            <span class="mb-2 block text-sm font-medium text-slate-200">Monthly rate</span>
             <input id="price" type="number" min="0" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white" placeholder="3500">
+            <p class="mt-2 text-sm text-slate-400">A typical month, in dollars. You can change it any time.</p>
           </label>
         </div>
-        <button type="submit" class="rounded-full bg-emerald-400 px-8 py-4 text-sm font-bold text-slate-950">Go to Floor Plan App</button>
+        <button type="submit" class="rounded-full bg-emerald-400 px-8 py-4 text-sm font-bold text-slate-950">Continue</button>
       </form>
     </section>
   </main>
 
   <footer class="border-t border-white/10 px-6 py-8 text-center text-xs text-slate-500">
-    © 2026 thelo.fyi • A product of EC Rental Property Management LLC
-    <span class="mx-2">•</span><a href="/privacy/" class="hover:text-slate-300">Privacy</a>
-    <span class="mx-2">•</span><a href="/terms/" class="hover:text-slate-300">Terms</a>
-    <span class="mx-2">•</span><a href="/disclaimer/" class="hover:text-slate-300">Disclaimer</a>
+    © 2026 thelo.fyi. All rights reserved.
+    <span class="mx-2">·</span><a href="/privacy/" class="hover:text-slate-300">Privacy</a>
+    <span class="mx-2">·</span><a href="/terms/" class="hover:text-slate-300">Terms</a>
+    <span class="mx-2">·</span><a href="/disclaimer/" class="hover:text-slate-300">Disclaimer</a>
   </footer>
 
   <script>
@@ -57,7 +71,7 @@
     function updatePreview() {
       const slug = slugify(slugInput.value || nameInput.value);
       slugInput.value = slug;
-      preview.textContent = `thelo.fyi/r/${slug || "your-slug"}`;
+      preview.textContent = `thelo.fyi/r/${slug || "your-home"}`;
     }
 
     nameInput.addEventListener("input", updatePreview);

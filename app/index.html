@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thelo Engine</title>
+  <meta name="description" content="Flat-fee listings for licensed Fresno care homes. Operators pay a flat monthly fee, never per resident." />
+  <meta property="og:title" content="thelo.fyi — Fresno care home listings" />
+  <meta property="og:description" content="Flat-fee listings for licensed Fresno care homes. Operators pay a flat monthly fee, never per resident." />
+  <meta property="og:image" content="https://thelo.fyi/og-image.jpg" />
+  <meta property="og:url" content="https://thelo.fyi/app/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="thelo.fyi — Fresno care home listings" />
+  <meta name="twitter:description" content="Flat-fee listings for licensed Fresno care homes. Operators pay a flat monthly fee, never per resident." />
+  <meta name="twitter:image" content="https://thelo.fyi/og-image.jpg" />
+  <title>Room planner — thelo.fyi</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100">
@@ -12,8 +22,9 @@
   <main class="mx-auto max-w-6xl px-6 py-10">
     <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
       <div>
-        <p class="text-sm uppercase tracking-[0.2em] text-slate-400">Thelo Engine</p>
-        <h1 class="mt-2 text-3xl font-black">Facility floor plan + Title 22 check</h1>
+        <p class="text-sm uppercase tracking-[0.2em] text-slate-400">thelo.fyi</p>
+        <h1 class="mt-2 text-3xl font-black">Room planner</h1>
+        <p class="mt-2 text-sm text-slate-400">Planning tool only. Not a compliance determination.</p>
       </div>
       <a href="/" class="rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-slate-200">Back Home</a>
     </div>
@@ -22,54 +33,63 @@
       <section class="rounded-3xl border border-white/10 bg-white/5 p-6">
         <div id="dropzone" class="flex min-h-56 cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-sky-400/40 bg-sky-400/5 p-8 text-center transition hover:bg-sky-400/10">
           <input id="floorPlan" type="file" accept="image/*,.pdf" class="hidden">
-          <p class="text-lg font-semibold text-white">Upload floor plan</p>
-          <p class="mt-2 text-sm text-slate-300">Drag and drop an image or PDF here, or click to browse.</p>
-          <p id="fileMeta" class="mt-4 text-xs uppercase tracking-[0.2em] text-slate-400">No file selected</p>
+          <p class="text-lg font-semibold text-white">Floor plan — optional</p>
+          <p class="mt-2 text-sm text-slate-300">A photo or PDF, if you have one handy. A phone picture of a printed plan is fine.</p>
+          <p class="mt-2 text-sm font-semibold text-sky-200">Don't have one? Skip this — you can add it later.</p>
+          <p id="fileMeta" class="mt-4 text-xs uppercase tracking-[0.2em] text-slate-400">No file added</p>
         </div>
 
         <form id="facilityForm" class="mt-8 space-y-6">
           <div class="grid gap-4 md:grid-cols-2">
             <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-200">Facility name</span>
+              <span class="mb-2 block text-sm font-medium text-slate-200">Name of your home</span>
               <input id="facilityName" name="facilityName" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none ring-0" placeholder="Fresno Garden House">
             </label>
             <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-200">Slug</span>
+              <span class="mb-2 block text-sm font-medium text-slate-200">Web address for your listing</span>
               <input id="slug" name="slug" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none ring-0" placeholder="fresno-garden-house">
+              <p class="mt-2 text-sm text-slate-400">Fills in from your home's name. Your page will be <span id="slugPreview" class="font-semibold text-slate-200">thelo.fyi/r/your-home</span></p>
             </label>
           </div>
 
-          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div class="grid gap-4 md:grid-cols-3">
             <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-200">Total beds</span>
+              <span class="mb-2 block text-sm font-medium text-slate-200">Beds in total</span>
               <input id="totalBeds" name="totalBeds" type="number" min="1" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white">
+              <p class="mt-2 text-sm text-slate-400">Your licensed capacity.</p>
             </label>
             <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-200">Available beds</span>
+              <span class="mb-2 block text-sm font-medium text-slate-200">Beds open right now</span>
               <input id="availableBeds" name="availableBeds" type="number" min="0" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white">
+              <p class="mt-2 text-sm text-slate-400">Enter 0 if you are full.</p>
             </label>
             <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-200">Monthly price</span>
+              <span class="mb-2 block text-sm font-medium text-slate-200">Monthly rate</span>
               <input id="price" name="price" type="number" min="0" step="1" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white" placeholder="3500">
-            </label>
-            <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-200">Latitude</span>
-              <input id="lat" name="lat" type="number" step="0.0001" value="36.7378" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white">
+              <p class="mt-2 text-sm text-slate-400">A typical month, in dollars.</p>
             </label>
           </div>
 
-          <div class="grid gap-4 md:grid-cols-2">
-            <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-200">Longitude</span>
-              <input id="lng" name="lng" type="number" step="0.0001" value="-119.7871" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white">
-            </label>
+          <div class="rounded-3xl border border-white/10 bg-slate-950/70 p-5">
+            <h2 class="text-xl font-bold text-white">Where to put your map pin</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-400">Not sure? Leave these as they are — your pin will sit in central Fresno until you change them. To set it exactly: open Google Maps, right-click your home, then click the two numbers at the top of the menu to copy them.</p>
+            <div class="mt-4 grid gap-4 md:grid-cols-2">
+              <label class="block">
+                <span class="mb-2 block text-sm font-medium text-slate-200">First number</span>
+                <input id="lat" name="lat" type="number" step="0.0001" value="36.7378" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white">
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-sm font-medium text-slate-200">Second number</span>
+                <input id="lng" name="lng" type="number" step="0.0001" value="-119.7871" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white">
+              </label>
+            </div>
           </div>
 
           <div class="rounded-3xl border border-white/10 bg-slate-950/70 p-5">
             <div class="mb-4 flex items-center justify-between gap-4">
               <div>
                 <h2 class="text-xl font-bold text-white">Rooms</h2>
-                <p class="text-sm text-slate-400">Title 22 minimums: 80 sq ft single, 60 sq ft per bed multi.</p>
+                <p class="text-sm text-slate-400">Room names, how many beds in each, and roughly how big. For your own planning.</p>
               </div>
               <button type="button" id="addRoom" class="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-sm font-semibold text-emerald-100">Add Room</button>
             </div>
@@ -77,7 +97,7 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-4">
-            <button type="submit" class="rounded-full bg-emerald-400 px-8 py-4 text-sm font-bold text-slate-950">Save Facility</button>
+            <button type="submit" class="rounded-full bg-emerald-400 px-8 py-4 text-sm font-bold text-slate-950">Save my listing</button>
             <p id="status" class="text-sm text-slate-300"></p>
           </div>
         </form>
@@ -85,9 +105,9 @@
 
       <aside class="space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6">
         <div class="rounded-2xl bg-slate-950 p-5">
-          <p class="text-sm uppercase tracking-[0.2em] text-slate-400">Compliance</p>
-          <p id="complianceBadge" class="mt-3 inline-flex rounded-full bg-slate-800 px-4 py-2 text-sm font-bold text-slate-200">Waiting for room details</p>
-          <p id="complianceText" class="mt-4 text-sm leading-7 text-slate-300">Enter room sizes and beds to evaluate §87307 floor-area requirements.</p>
+          <p class="text-sm uppercase tracking-[0.2em] text-slate-400">Room summary</p>
+          <p id="roomSummary" class="mt-3 text-sm leading-7 text-slate-300">Add room details to see your totals.</p>
+          <p class="mt-4 text-xs leading-6 text-slate-500">Planning tool only. Not a compliance determination. Compliance is determined solely by CDSS.</p>
         </div>
         <div id="linksCard" class="hidden rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-5">
           <p class="text-sm uppercase tracking-[0.2em] text-emerald-100">Saved</p>
@@ -101,10 +121,10 @@
   </main>
 
   <footer class="border-t border-white/10 px-6 py-8 text-center text-xs text-slate-500">
-    © 2026 thelo.fyi • A product of EC Rental Property Management LLC
-    <span class="mx-2">•</span><a href="/privacy/" class="hover:text-slate-300">Privacy</a>
-    <span class="mx-2">•</span><a href="/terms/" class="hover:text-slate-300">Terms</a>
-    <span class="mx-2">•</span><a href="/disclaimer/" class="hover:text-slate-300">Disclaimer</a>
+    © 2026 thelo.fyi. All rights reserved.
+    <span class="mx-2">·</span><a href="/privacy/" class="hover:text-slate-300">Privacy</a>
+    <span class="mx-2">·</span><a href="/terms/" class="hover:text-slate-300">Terms</a>
+    <span class="mx-2">·</span><a href="/disclaimer/" class="hover:text-slate-300">Disclaimer</a>
   </footer>
 
   <script>
@@ -113,8 +133,7 @@
     const params = new URLSearchParams(window.location.search);
     const roomsContainer = document.getElementById("rooms");
     const statusEl = document.getElementById("status");
-    const complianceBadge = document.getElementById("complianceBadge");
-    const complianceText = document.getElementById("complianceText");
+    const roomSummary = document.getElementById("roomSummary");
     const linksCard = document.getElementById("linksCard");
     const referralLink = document.getElementById("referralLink");
     const facilityNameInput = document.getElementById("facilityName");
@@ -131,7 +150,7 @@
         size: file.size,
         type: file.type || "application/octet-stream"
       };
-      fileMeta.textContent = `${uploadedFile.name} • ${Math.round(uploadedFile.size / 1024)} KB`;
+      fileMeta.textContent = `Added: ${uploadedFile.name}`;
     }
 
     function slugify(value) {
@@ -152,27 +171,28 @@
         </label>
         <div class="grid gap-4 sm:grid-cols-2">
           <label class="block">
-            <span class="mb-2 block text-sm font-medium text-slate-200">Beds</span>
+            <span class="mb-2 block text-sm font-medium text-slate-200">Beds in this room</span>
             <input type="number" min="1" value="${room.beds || 1}" class="room-beds w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white">
           </label>
           <label class="block">
-            <span class="mb-2 block text-sm font-medium text-slate-200">Sq ft</span>
+            <span class="mb-2 block text-sm font-medium text-slate-200">Room size in square feet</span>
             <input type="number" min="1" value="${room.sqft || ""}" class="room-sqft w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white" placeholder="120">
+            <p class="mt-2 text-xs text-slate-400">Length times width, in feet. A rough number is fine.</p>
           </label>
         </div>
         <button type="button" class="remove-room self-end rounded-full border border-rose-300/30 bg-rose-300/10 px-4 py-3 text-sm font-semibold text-rose-100">Remove</button>
       `;
       wrapper.querySelector(".remove-room").addEventListener("click", () => {
         wrapper.remove();
-        updateCompliance();
+        updateRoomSummary();
       });
-      wrapper.querySelectorAll("input").forEach((input) => input.addEventListener("input", updateCompliance));
+      wrapper.querySelectorAll("input").forEach((input) => input.addEventListener("input", updateRoomSummary));
       return wrapper;
     }
 
     function addRoom(room) {
       roomsContainer.appendChild(roomTemplate(room));
-      updateCompliance();
+      updateRoomSummary();
     }
 
     function getRooms() {
@@ -180,33 +200,24 @@
         const name = room.querySelector(".room-name").value.trim();
         const beds = Number(room.querySelector(".room-beds").value || 0);
         const sqft = Number(room.querySelector(".room-sqft").value || 0);
-        const requiredSqft = beds <= 1 ? 80 : beds * 60;
         return {
           name: name || `Room ${index + 1}`,
           beds,
-          sqft,
-          requiredSqft,
-          status: sqft >= requiredSqft ? "PASS" : "FAIL"
+          sqft
         };
       });
     }
 
-    function updateCompliance() {
+    function updateRoomSummary() {
       const rooms = getRooms();
       if (!rooms.length || rooms.some((room) => !room.sqft || !room.beds)) {
-        complianceBadge.textContent = "Waiting for room details";
-        complianceBadge.className = "mt-3 inline-flex rounded-full bg-slate-800 px-4 py-2 text-sm font-bold text-slate-200";
-        complianceText.textContent = "Enter room sizes and beds to evaluate §87307 floor-area requirements.";
+        roomSummary.textContent = "Add room details to see your totals.";
         return;
       }
 
-      const failures = rooms.filter((room) => room.status === "FAIL");
-      const isPass = failures.length === 0;
-      complianceBadge.textContent = `${isPass ? "PASS" : "FAIL"} §87307`;
-      complianceBadge.className = `mt-3 inline-flex rounded-full px-4 py-2 text-sm font-bold ${isPass ? "bg-emerald-400 text-slate-950" : "bg-rose-400 text-slate-950"}`;
-      complianceText.textContent = isPass
-        ? "Every room meets minimum floor area requirements for declared occupancy."
-        : failures.map((room) => `${room.name}: ${room.sqft} sq ft for ${room.beds} bed(s), needs ${room.requiredSqft} sq ft.`).join(" ");
+      const totalBeds = rooms.reduce((sum, room) => sum + room.beds, 0);
+      const totalSqft = rooms.reduce((sum, room) => sum + room.sqft, 0);
+      roomSummary.textContent = `${rooms.length} room(s) · ${totalBeds} bed(s) · ${totalSqft} sq ft total.`;
     }
 
     async function postFacility(payload) {
@@ -245,7 +256,7 @@
       }
       if (draft.floorPlan && draft.floorPlan.name) {
         uploadedFile = draft.floorPlan;
-        fileMeta.textContent = `${draft.floorPlan.name} • ${Math.round((draft.floorPlan.size || 0) / 1024)} KB`;
+        fileMeta.textContent = `Added: ${draft.floorPlan.name}`;
       }
     }
 
@@ -282,11 +293,18 @@
       if (!slugInput.dataset.edited) {
         slugInput.value = slugify(facilityNameInput.value);
       }
+      updateSlugPreview();
     });
+
+    function updateSlugPreview() {
+      const preview = document.getElementById("slugPreview");
+      if (preview) preview.textContent = `thelo.fyi/r/${slugInput.value || "your-home"}`;
+    }
 
     slugInput.addEventListener("input", () => {
       slugInput.dataset.edited = "true";
       slugInput.value = slugify(slugInput.value);
+      updateSlugPreview();
     });
 
     document.getElementById("addRoom").addEventListener("click", () => addRoom({ beds: 1, sqft: 80 }));
@@ -321,7 +339,6 @@
     document.getElementById("facilityForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const rooms = getRooms();
-      const complianceStatus = rooms.every((room) => room.status === "PASS") ? "PASS" : "FAIL";
       const payload = {
         facilityName: facilityNameInput.value.trim(),
         slug: slugify(slugInput.value),
@@ -331,12 +348,11 @@
         lat: Number(document.getElementById("lat").value),
         lng: Number(document.getElementById("lng").value),
         rooms,
-        floorPlan: uploadedFile,
-        complianceStatus
+        floorPlan: uploadedFile
       };
 
       if (!payload.slug || !payload.facilityName) {
-        statusEl.textContent = "Facility name and slug are required.";
+        statusEl.textContent = "Please fill in your home\u2019s name and its web address.";
         return;
       }
 
@@ -345,18 +361,19 @@
 
       try {
         const response = await postFacility(payload);
-        statusEl.textContent = "Saved locally and synced to Thelo.";
+        statusEl.textContent = "Saved. Your listing page is ready \u2014 see the link on the right.";
         linksCard.classList.remove("hidden");
         const facilityId = response.facility.id || response.facility.slug;
         referralLink.href = `/r/?id=${encodeURIComponent(facilityId)}`;
-        referralLink.textContent = `View referral: /r/?id=${facilityId}`;
+        referralLink.textContent = "View your listing page";
       } catch (error) {
         statusEl.textContent = error.message;
       }
     });
 
     initialize();
-    updateCompliance();
+    updateRoomSummary();
+    updateSlugPreview();
   </script>
 </body>
 </html>

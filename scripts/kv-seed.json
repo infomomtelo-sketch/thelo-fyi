@@ -1,0 +1,42 @@
+[
+  {
+    "key": "westmont-fresno",
+    "value": "{\"id\":\"westmont-fresno\",\"slug\":\"westmont-fresno\",\"facilityName\":\"Westmont of Fresno\",\"name\":\"Westmont of Fresno\",\"address\":\"7442 N Millbrook Ave, Fresno, CA 93720\",\"care_level\":\"Assisted Living\",\"phone\":\"5598255425\",\"availableBeds\":4,\"beds_available\":4,\"lat\":36.8324,\"lng\":-119.7915,\"license_number\":null,\"license_checked_at\":null,\"rooms\":[],\"last_updated\":\"2026-05-13\"}"
+  },
+  {
+    "key": "windham",
+    "value": "{\"id\":\"windham\",\"slug\":\"windham\",\"facilityName\":\"The Windham\",\"name\":\"The Windham\",\"address\":\"1100 E Spruce Ave, Fresno, CA 93720\",\"care_level\":\"Assisted Living\",\"phone\":\"5592982000\",\"availableBeds\":2,\"beds_available\":2,\"lat\":36.8378,\"lng\":-119.7862,\"license_number\":null,\"license_checked_at\":null,\"rooms\":[],\"last_updated\":\"2026-05-13\"}"
+  },
+  {
+    "key": "grove-sunrise",
+    "value": "{\"id\":\"grove-sunrise\",\"slug\":\"grove-sunrise\",\"facilityName\":\"Sunrise at The Grove\",\"name\":\"Sunrise at The Grove\",\"address\":\"7444 N Cedar Ave, Fresno, CA 93720\",\"care_level\":\"Memory Care\",\"phone\":\"5594491500\",\"availableBeds\":3,\"beds_available\":3,\"lat\":36.8331,\"lng\":-119.7732,\"license_number\":null,\"license_checked_at\":null,\"rooms\":[],\"last_updated\":\"2026-05-13\"}"
+  },
+  {
+    "key": "paintbrush",
+    "value": "{\"id\":\"paintbrush\",\"slug\":\"paintbrush\",\"facilityName\":\"Paintbrush Assisted Living\",\"name\":\"Paintbrush Assisted Living\",\"address\":\"4356 W Ashlan Ave, Fresno, CA 93722\",\"care_level\":\"Memory Care\",\"phone\":\"5596176359\",\"availableBeds\":5,\"beds_available\":5,\"lat\":36.794727,\"lng\":-119.870469,\"license_number\":null,\"license_checked_at\":null,\"rooms\":[],\"last_updated\":\"2026-05-13\"}"
+  },
+  {
+    "key": "belmar-villa",
+    "value": "{\"id\":\"belmar-villa\",\"slug\":\"belmar-villa\",\"facilityName\":\"Belmar Villa\",\"name\":\"Belmar Villa\",\"address\":\"2020 N Weber Ave, Fresno, CA 93705\",\"care_level\":\"Assisted Living\",\"phone\":\"5592221000\",\"availableBeds\":6,\"beds_available\":6,\"lat\":36.7812,\"lng\":-119.8188,\"license_number\":null,\"license_checked_at\":null,\"rooms\":[],\"last_updated\":\"2026-05-13\"}"
+  },
+  {
+    "key": "calimyrna",
+    "value": "{\"id\":\"calimyrna\",\"slug\":\"calimyrna\",\"facilityName\":\"Calimyrna Assisted Living\",\"name\":\"Calimyrna Assisted Living\",\"address\":\"1545 W Calimyrna Ave, Fresno, CA 93711\",\"care_level\":\"Assisted Living\",\"phone\":\"5594122335\",\"availableBeds\":1,\"beds_available\":1,\"lat\":36.823609,\"lng\":-119.820589,\"license_number\":null,\"license_checked_at\":null,\"rooms\":[],\"last_updated\":\"2026-05-13\"}"
+  },
+  {
+    "key": "vintage-gardens",
+    "value": "{\"id\":\"vintage-gardens\",\"slug\":\"vintage-gardens\",\"facilityName\":\"Vintage Gardens\",\"name\":\"Vintage Gardens\",\"address\":\"540 S Peach Ave, Fresno, CA 93727\",\"care_level\":\"Assisted Living\",\"phone\":\"5592524036\",\"availableBeds\":2,\"beds_available\":2,\"lat\":36.736965,\"lng\":-119.71884,\"license_number\":null,\"license_checked_at\":null,\"rooms\":[],\"last_updated\":\"2026-05-13\"}"
+  },
+  {
+    "key": "oak-park",
+    "value": "{\"id\":\"oak-park\",\"slug\":\"oak-park\",\"facilityName\":\"Oak Park Senior Villas\",\"name\":\"Oak Park Senior Villas\",\"address\":\"2597 S Richelle Ave, Fresno, CA 93706\",\"care_level\":\"Independent Living\",\"phone\":\"5592642028\",\"availableBeds\":8,\"beds_available\":8,\"lat\":36.70816,\"lng\":-119.728353,\"license_number\":null,\"license_checked_at\":null,\"rooms\":[],\"last_updated\":\"2026-05-13\"}"
+  },
+  {
+    "key": "twilight-haven",
+    "value": "{\"id\":\"twilight-haven\",\"slug\":\"twilight-haven\",\"facilityName\":\"Twilight Haven\",\"name\":\"Twilight Haven\",\"address\":\"1717 S Winery Ave, Fresno, CA 93727\",\"care_level\":\"Assisted Living\",\"phone\":\"5592518417\",\"availableBeds\":0,\"beds_available\":0,\"lat\":36.726099,\"lng\":-119.731611,\"license_number\":null,\"license_checked_at\":null,\"rooms\":[],\"last_updated\":\"2026-05-13\"}"
+  },
+  {
+    "key": "fairwinds",
+    "value": "{\"id\":\"fairwinds\",\"slug\":\"fairwinds\",\"facilityName\":\"Fairwinds Woodward Park\",\"name\":\"Fairwinds Woodward Park\",\"address\":\"9525 N Fort Washington Rd, Fresno, CA 93730\",\"care_level\":\"Assisted Living\",\"phone\":\"5594343800\",\"availableBeds\":3,\"beds_available\":3,\"lat\":36.8711,\"lng\":-119.783,\"license_number\":null,\"license_checked_at\":null,\"rooms\":[],\"last_updated\":\"2026-05-13\"}"
+  }
+]

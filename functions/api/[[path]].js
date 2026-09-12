@@ -1,60 +1,3 @@
-const DEMO_FACILITIES = [
-  {
-    id: 1,
-    facilityName: "Fresno Garden House",
-    slug: "fresno-garden-house",
-    address: "1234 N Cedar Ave, Fresno, CA 93703",
-    totalBeds: 6,
-    availableBeds: 2,
-    care_level: "RCFE",
-    phone: "(559) 555-0101",
-    price: 3500,
-    lat: 36.7378,
-    lng: -119.7871,
-    last_updated: "2026-09-10T00:00:00Z",
-    rooms: [
-      { name: "Room A", beds: 1, sqft: 110 },
-      { name: "Room B", beds: 2, sqft: 140 }
-    ]
-  },
-  {
-    id: 2,
-    facilityName: "Fig Garden Care",
-    slug: "fig-garden-care",
-    address: "4567 W Shaw Ave, Fresno, CA 93711",
-    totalBeds: 4,
-    availableBeds: 0,
-    care_level: "RCFE",
-    phone: "(559) 555-0102",
-    price: 4200,
-    lat: 36.8082,
-    lng: -119.8318,
-    last_updated: "2026-09-10T00:00:00Z",
-    rooms: [
-      { name: "Front Suite", beds: 1, sqft: 104 },
-      { name: "Shared Wing", beds: 2, sqft: 150 }
-    ]
-  },
-  {
-    id: 3,
-    facilityName: "Central Valley Retreat",
-    slug: "central-valley-retreat",
-    address: "7890 E Olive Ave, Fresno, CA 93720",
-    totalBeds: 5,
-    availableBeds: 1,
-    care_level: "RCFE",
-    phone: "(559) 555-0103",
-    price: 3900,
-    lat: 36.7712,
-    lng: -119.7451,
-    last_updated: "2026-09-10T00:00:00Z",
-    rooms: [
-      { name: "Sunrise", beds: 1, sqft: 90 },
-      { name: "Orchard", beds: 2, sqft: 132 }
-    ]
-  }
-];
-
 // Neighbourhood-level coordinates per ZIP, averaged from the real Fresno
 // facilities in facilities.json. These place a pin in the right part of town;
 // they are not building-accurate and must not be presented as exact. A ZIP that
@@ -265,7 +208,10 @@ function sanitizeFacility(payload) {
 async function listStoredFacilities(env) {
   const keys = await env.FACILITIES.list();
   if (!keys.keys.length) {
-    return DEMO_FACILITIES;
+    // An empty store returns an empty list. It must never fall back to invented
+    // records: a fabricated facility served as a real listing is indistinguishable
+    // from a real one to a family reading it.
+    return [];
   }
 
   const facilities = await Promise.all(

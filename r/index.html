@@ -226,10 +226,10 @@
 
     const params = new URLSearchParams(window.location.search);
     const pathMatch = window.location.pathname.match(/^\/r\/([^/]+)\/?$/);
-    const facilityId = params.get("id") || params.get("f");
     const facilitySlug = params.get("slug") || (pathMatch ? readPathSegment(pathMatch[1]) : "");
-    const lookupType = facilityId ? "id" : "slug";
-    const lookupValue = facilityId || facilitySlug;
+    const facilityId = params.get("id") || params.get("f");
+    const lookupType = facilitySlug ? "slug" : "id";
+    const lookupValue = facilitySlug || facilityId;
     fetchFacility(lookupValue, lookupType).then(renderFacility);
   </script>
 </body>

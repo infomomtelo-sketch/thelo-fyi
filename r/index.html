@@ -146,7 +146,7 @@
 
     function referralSlugFromPath(pathname) {
       if (!pathname.startsWith("/r/")) return "";
-      return pathname.slice(3).replace(/\/+$/, "");
+      return pathname.slice(3).split("/").find(Boolean) || "";
     }
 
     function normalizeFacility(facility) {

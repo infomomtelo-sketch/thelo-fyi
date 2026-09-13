@@ -46,8 +46,8 @@ const ALLOWED_ORIGINS = new Set([
 
 const PHI_PATTERNS = [
   /\bpatient\b/i,
-  /\bresident\b/i,
   /\bresident name\b/i,
+  /\bresident (id|identifier|number)\b/i,
   /\bfirst name\b/i,
   /\blast name\b/i,
   /\bdiagnosis\b/i,

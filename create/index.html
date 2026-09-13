@@ -34,7 +34,7 @@
           <span class="mb-2 block text-sm font-medium text-slate-200">Web address for your listing</span>
           <input id="slug" required class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white" placeholder="fresno-garden-house">
           <p class="mt-2 text-sm text-slate-400">We fill this in from your home's name. Change it only if you want a different link.</p>
-          <p class="mt-2 text-sm text-slate-300">Your page will be: <span id="preview" class="font-semibold text-white">thelo.fyi/r/fresno-garden-house</span></p>
+          <p class="mt-2 text-sm text-slate-300">Your page will be: <span id="preview" class="font-semibold text-white">https://thelo.fyi/r/fresno-garden-house</span></p>
         </label>
         <div class="grid gap-4 md:grid-cols-2">
           <label class="block">
@@ -64,15 +64,20 @@
     const nameInput = document.getElementById("name");
     const slugInput = document.getElementById("slug");
     const preview = document.getElementById("preview");
+    const PUBLIC_SITE_ORIGIN = "https://thelo.fyi";
 
     function slugify(value) {
       return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
     }
 
+    function buildReferralUrl(slug) {
+      return new URL(`/r/${encodeURIComponent(slug || "your-home")}`, PUBLIC_SITE_ORIGIN).toString();
+    }
+
     function updatePreview() {
       const slug = slugify(slugInput.value || nameInput.value);
       slugInput.value = slug;
-      preview.textContent = `thelo.fyi/r/${slug || "your-home"}`;
+      preview.textContent = buildReferralUrl(slug);
     }
 
     nameInput.addEventListener("input", updatePreview);

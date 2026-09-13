@@ -214,7 +214,8 @@
     }
 
     const params = new URLSearchParams(window.location.search);
-    const facilityId = params.get("id") || params.get("f");
+    const pathMatch = window.location.pathname.match(/^\/r\/([^/]+)\/?$/);
+    const facilityId = params.get("id") || params.get("slug") || params.get("f") || (pathMatch ? decodeURIComponent(pathMatch[1]) : "");
     fetchFacility(facilityId).then(renderFacility);
   </script>
 </body>

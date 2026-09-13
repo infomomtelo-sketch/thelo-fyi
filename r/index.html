@@ -136,6 +136,14 @@
       }
     }
 
+    function normalizeSlug(value) {
+      return String(value || "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
     function referralSlugFromPath(pathname) {
       if (!pathname.startsWith("/r/")) return "";
       return pathname.slice(3).replace(/\/+$/, "");
@@ -182,7 +190,7 @@
       try {
         const facilities = await fetchJson("/data/availability.json");
         const fallback = (Array.isArray(facilities) ? facilities : []).find((facility) => {
-          if (lookup === "slug") return String(facility.slug) === String(value);
+          if (lookup === "slug") return normalizeSlug(facility.slug) === normalizeSlug(value);
           return String(facility.id) === String(value);
         });
         return normalizeFacility(fallback || demoFacility);

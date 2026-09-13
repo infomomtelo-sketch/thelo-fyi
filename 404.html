@@ -43,11 +43,16 @@
       }
     }
 
-    const match = window.location.pathname.match(/^\/r\/([^/]+)\/?$/);
-    if (match && match[1]) {
+    function referralSlugFromPath(pathname) {
+      if (!pathname.startsWith("/r/")) return "";
+      return pathname.slice(3).replace(/\/+$/, "");
+    }
+
+    const pathSlug = referralSlugFromPath(window.location.pathname);
+    if (pathSlug) {
       const url = new URL("/r/", window.location.origin);
       const params = new URLSearchParams(window.location.search);
-      params.set("slug", readPathSegment(match[1]));
+      params.set("slug", readPathSegment(pathSlug));
       url.search = params.toString();
       window.location.replace(url.toString());
     }

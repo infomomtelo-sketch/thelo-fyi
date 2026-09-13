@@ -136,6 +136,11 @@
       }
     }
 
+    function referralSlugFromPath(pathname) {
+      if (!pathname.startsWith("/r/")) return "";
+      return pathname.slice(3).replace(/\/+$/, "");
+    }
+
     function normalizeFacility(facility) {
       const source = facility?.facility || facility || {};
       return {
@@ -225,8 +230,7 @@
     }
 
     const params = new URLSearchParams(window.location.search);
-    const pathMatch = window.location.pathname.match(/^\/r\/([^/]+)\/?$/);
-    const facilitySlug = params.get("slug") || (pathMatch ? readPathSegment(pathMatch[1]) : "");
+    const facilitySlug = params.get("slug") || readPathSegment(referralSlugFromPath(window.location.pathname));
     const facilityId = params.get("id") || params.get("f");
     const lookupType = facilitySlug ? "slug" : "id";
     const lookupValue = facilitySlug || facilityId;

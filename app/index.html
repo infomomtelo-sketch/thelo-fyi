@@ -418,8 +418,8 @@
       } catch (error) {
         if (error.unreachable) {
           setStatus(draftKept
-            ? "We could not publish your listing just now. Your details are still here on this device \u2014 check your connection and tap Save again."
-            : "We could not publish your listing just now. Please check your connection and tap Save again.", "error");
+            ? "We could not publish your listing just now, so it is not live on the map yet. Your details are still here on this device \u2014 check your connection and tap Save again."
+            : "We could not publish your listing just now, so it is not live on the map yet. Please check your connection and tap Save again.", "error");
         } else {
           setStatus(error.message, "error");
         }

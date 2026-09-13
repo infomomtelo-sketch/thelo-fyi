@@ -170,7 +170,7 @@
           if (items === null) {
             throw new Error(`Invalid facilities payload from ${source}`);
           }
-          return normalizeFacilities(items);
+          return { facilities: normalizeFacilities(items), source };
         } catch (error) {
           lastError = error;
         }
@@ -179,14 +179,17 @@
     }
 
     fetchFacilities()
-      .then((facilities) => {
+      .then(({ facilities, source }) => {
         if (!facilities.length) {
           listingSummary.textContent = 'No facilities available right now.';
           facilityList.innerHTML = '<div class="rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-slate-200">Please check back soon for updated Fresno listings.</div>';
           return;
         }
 
-        listingSummary.textContent = `${facilities.length} facilities with live map pins.`;
+        const isLiveSource = source === '/api/facilities';
+        listingSummary.textContent = isLiveSource
+          ? `${facilities.length} facilities with live map pins.`
+          : `${facilities.length} facilities loaded from backup data. New saves may not appear yet.`;
 
         const bounds = [];
 

@@ -149,6 +149,14 @@
       return pathname.slice(3).split("/").find(Boolean) || "";
     }
 
+    function matchesLookup(facility, value, lookup) {
+      const source = facility?.facility || facility || {};
+      if (lookup === "slug") {
+        return normalizeSlug(source.slug || source.id || source.name || source.facilityName) === normalizeSlug(value);
+      }
+      return String(source.id || source.slug || "") === String(value);
+    }
+
     function normalizeFacility(facility) {
       const source = facility?.facility || facility || {};
       return {
@@ -189,10 +197,7 @@
 
       try {
         const facilities = await fetchJson("/data/availability.json");
-        const fallback = (Array.isArray(facilities) ? facilities : []).find((facility) => {
-          if (lookup === "slug") return normalizeSlug(facility.slug) === normalizeSlug(value);
-          return String(facility.id) === String(value);
-        });
+        const fallback = (Array.isArray(facilities) ? facilities : []).find((facility) => matchesLookup(facility, value, lookup));
         return normalizeFacility(fallback || demoFacility);
       } catch (_) {
         if (lastError) {
@@ -238,10 +243,12 @@
     }
 
     const params = new URLSearchParams(window.location.search);
+    const pathSlug = readPathSegment(referralSlugFromPath(window.location.pathname));
+    const querySlug = params.get("slug");
     const facilityId = params.get("id") || params.get("f");
-    const facilitySlug = params.get("slug") || readPathSegment(referralSlugFromPath(window.location.pathname));
-    const lookupType = facilityId ? "id" : "slug";
-    const lookupValue = facilityId || facilitySlug;
+    const facilitySlug = pathSlug || querySlug;
+    const lookupType = facilitySlug ? "slug" : "id";
+    const lookupValue = facilitySlug || facilityId;
     fetchFacility(lookupValue, lookupType).then(renderFacility);
   </script>
 </body>

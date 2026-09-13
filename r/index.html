@@ -238,10 +238,10 @@
     }
 
     const params = new URLSearchParams(window.location.search);
-    const facilitySlug = params.get("slug") || readPathSegment(referralSlugFromPath(window.location.pathname));
     const facilityId = params.get("id") || params.get("f");
-    const lookupType = facilitySlug ? "slug" : "id";
-    const lookupValue = facilitySlug || facilityId;
+    const facilitySlug = params.get("slug") || readPathSegment(referralSlugFromPath(window.location.pathname));
+    const lookupType = facilityId ? "id" : "slug";
+    const lookupValue = facilityId || facilitySlug;
     fetchFacility(lookupValue, lookupType).then(renderFacility);
   </script>
 </body>

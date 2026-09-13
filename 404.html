@@ -55,6 +55,8 @@
     if (pathSlug) {
       const url = new URL("/r/", window.location.origin);
       const params = new URLSearchParams(window.location.search);
+      params.delete("id");
+      params.delete("f");
       params.set("slug", readPathSegment(pathSlug));
       url.search = params.toString();
       window.location.replace(url.toString());

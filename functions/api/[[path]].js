@@ -46,14 +46,20 @@ const ALLOWED_ORIGINS = new Set([
 
 const PHI_PATTERNS = [
   /\bpatient\b/i,
+  /\bresident\b/i,
   /\bresident name\b/i,
+  /\bfirst name\b/i,
+  /\blast name\b/i,
   /\bdiagnosis\b/i,
   /\bssn\b/i,
   /\bdob\b/i,
   /\bmedical record\b/i,
+  /\bmrn\b/i,
   /\bmedicare\b/i,
   /\bmedicaid\b/i,
-  /\binsurance\b/i
+  /\binsurance\b/i,
+  /\bappointment reason\b/i,
+  /\bmedical details?\b/i
 ];
 
 function corsHeaders(origin) {

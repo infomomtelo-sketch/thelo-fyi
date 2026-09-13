@@ -82,6 +82,16 @@ function json(body, status = 200, origin = "https://thelo.fyi") {
   });
 }
 
+function hasFacilitiesBinding(env) {
+  const store = env?.FACILITIES;
+  return Boolean(
+    store &&
+    typeof store.get === "function" &&
+    typeof store.put === "function" &&
+    typeof store.list === "function"
+  );
+}
+
 function normalizeSlug(slug) {
   return String(slug || "")
     .toLowerCase()
@@ -254,6 +264,9 @@ const api = {
 
     if (url.pathname === "/api/facility" && request.method === "POST") {
       try {
+        if (!hasFacilitiesBinding(env)) {
+          return json({ error: "Publishing is temporarily unavailable. Please try Save again in a few minutes." }, 503, origin);
+        }
         const payload = await request.json();
         if (hasPhi(payload)) {
           return json({ error: "PHI is not allowed." }, 400, origin);
@@ -267,6 +280,9 @@ const api = {
     }
 
     if (url.pathname === "/api/facility" && request.method === "GET") {
+      if (!hasFacilitiesBinding(env)) {
+        return json({ error: "Listings are temporarily unavailable. Please try again shortly." }, 503, origin);
+      }
       const id = String(url.searchParams.get("id") || "").trim();
       const slug = String(url.searchParams.get("slug") || "").trim();
       const lookupValue = id || slug;
@@ -286,6 +302,9 @@ const api = {
     }
 
     if (url.pathname === "/api/facilities" && request.method === "GET") {
+      if (!hasFacilitiesBinding(env)) {
+        return json({ error: "Listings are temporarily unavailable. Please try again shortly." }, 503, origin);
+      }
       const facilities = await listStoredFacilities(env);
       return json(facilities.map((facility) => toPublicFacility(facility)), 200, origin);
     }

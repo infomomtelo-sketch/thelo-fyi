@@ -28,6 +28,7 @@
 
   <footer class="border-t border-white/10 px-6 py-8 text-center text-xs text-slate-500">
     © 2026 thelo.fyi. All rights reserved.
+    <span class="mx-2">·</span><a href="mailto:hello@thelo.fyi" class="hover:text-slate-300">hello@thelo.fyi</a>
     <span class="mx-2">·</span><a href="/privacy/" class="hover:text-slate-300">Privacy</a>
     <span class="mx-2">·</span><a href="/terms/" class="hover:text-slate-300">Terms</a>
     <span class="mx-2">·</span><a href="/disclaimer/" class="hover:text-slate-300">Disclaimer</a>
@@ -37,7 +38,7 @@
     const match = window.location.pathname.match(/^\/r\/([^/]+)\/?$/);
     if (match && match[1]) {
       const url = new URL("/r/", window.location.origin);
-      url.searchParams.set("id", decodeURIComponent(match[1]));
+      url.searchParams.set("slug", decodeURIComponent(match[1]));
       window.location.replace(url.toString());
     }
   </script>

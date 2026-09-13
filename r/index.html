@@ -155,12 +155,12 @@
       return response.json();
     }
 
-    async function fetchFacility(id) {
-      if (!id) return demoFacility;
+    async function fetchFacility(value, lookup = "id") {
+      if (!value) return demoFacility;
       let lastError = new Error("Facility unavailable");
       for (const base of FACILITY_API_URLS) {
         try {
-          return normalizeFacility(await fetchJson(`${base}?id=${encodeURIComponent(id)}`));
+          return normalizeFacility(await fetchJson(`${base}?${lookup}=${encodeURIComponent(value)}`));
         } catch (error) {
           lastError = error;
         }
@@ -168,7 +168,10 @@
 
       try {
         const facilities = await fetchJson("/data/availability.json");
-        const fallback = (Array.isArray(facilities) ? facilities : []).find((facility) => String(facility.id) === String(id));
+        const fallback = (Array.isArray(facilities) ? facilities : []).find((facility) => {
+          if (lookup === "slug") return String(facility.slug) === String(value);
+          return String(facility.id) === String(value);
+        });
         return normalizeFacility(fallback || demoFacility);
       } catch (_) {
         if (lastError) {
@@ -215,8 +218,11 @@
 
     const params = new URLSearchParams(window.location.search);
     const pathMatch = window.location.pathname.match(/^\/r\/([^/]+)\/?$/);
-    const facilityId = params.get("id") || params.get("slug") || params.get("f") || (pathMatch ? decodeURIComponent(pathMatch[1]) : "");
-    fetchFacility(facilityId).then(renderFacility);
+    const facilityId = params.get("id") || params.get("f");
+    const facilitySlug = params.get("slug") || (pathMatch ? decodeURIComponent(pathMatch[1]) : "");
+    const lookupType = facilityId ? "id" : "slug";
+    const lookupValue = facilityId || facilitySlug;
+    fetchFacility(lookupValue, lookupType).then(renderFacility);
   </script>
 </body>
 </html>

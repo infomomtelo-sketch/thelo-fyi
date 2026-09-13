@@ -152,7 +152,7 @@
     function matchesLookup(facility, value, lookup) {
       const source = facility?.facility || facility || {};
       if (lookup === "slug") {
-        return normalizeSlug(source.slug || source.id || source.name || source.facilityName) === normalizeSlug(value);
+        return normalizeSlug(source.slug) === normalizeSlug(value);
       }
       return String(source.id || source.slug || "") === String(value);
     }

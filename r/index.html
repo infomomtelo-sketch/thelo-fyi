@@ -145,7 +145,7 @@
     }
 
     function referralSlugFromPath(pathname) {
-      if (!pathname.startsWith("/r/")) return "";
+      if (String(pathname || "").slice(0, 3).toLowerCase() !== "/r/") return "";
       return pathname.slice(3).replace(/\/+$/, "");
     }
 

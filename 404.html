@@ -38,7 +38,7 @@
     const match = window.location.pathname.match(/^\/r\/([^/]+)\/?$/);
     if (match && match[1]) {
       const url = new URL("/r/", window.location.origin);
-      url.searchParams.set("slug", decodeURIComponent(match[1]));
+      url.searchParams.set("slug", match[1]);
       window.location.replace(url.toString());
     }
   </script>

@@ -219,7 +219,7 @@
     const params = new URLSearchParams(window.location.search);
     const pathMatch = window.location.pathname.match(/^\/r\/([^/]+)\/?$/);
     const facilityId = params.get("id") || params.get("f");
-    const facilitySlug = params.get("slug") || (pathMatch ? decodeURIComponent(pathMatch[1]) : "");
+    const facilitySlug = params.get("slug") || (pathMatch ? pathMatch[1] : "");
     const lookupType = facilityId ? "id" : "slug";
     const lookupValue = facilityId || facilitySlug;
     fetchFacility(lookupValue, lookupType).then(renderFacility);

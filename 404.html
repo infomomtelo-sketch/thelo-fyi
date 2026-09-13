@@ -46,7 +46,9 @@
     const match = window.location.pathname.match(/^\/r\/([^/]+)\/?$/);
     if (match && match[1]) {
       const url = new URL("/r/", window.location.origin);
-      url.searchParams.set("slug", readPathSegment(match[1]));
+      const params = new URLSearchParams(window.location.search);
+      params.set("slug", readPathSegment(match[1]));
+      url.search = params.toString();
       window.location.replace(url.toString());
     }
   </script>
